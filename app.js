@@ -52,7 +52,7 @@ app.configure(function(){
     app.use(express.bodyParser());
     app.use(express.cookieParser());
     app.use(express.session({
-        "secret": "hallowelt1234"
+        "secret": config.session_secret
     }));
     app.use(everyauth.middleware());
     app.use(express.methodOverride());

@@ -1,0 +1,5 @@
+module.exports = {
+    session_secret: 'topSecret',
+    consumerKey: 'tumblr_api_key',
+    consumerSecret: 'tumblr_api_secret'
+};
