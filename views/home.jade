@@ -1,3 +1,10 @@
 h2 Welcome, #{everyauth.tumblr.user.name}
 h3
   a(href='/logout') Logout
+ul
+  each like in likes
+    li= like.blog_name
+        if like.photos
+           each photo in like.photos
+             div 
+                 img(src='#{photo.original_size.url}')

@@ -6,8 +6,7 @@
 var express = require('express'),
 routes = require('./routes'),
 config = require('./config'),
-everyauth = require('everyauth'),
-util = require('util');
+everyauth = require('everyauth');
 
 everyauth.debug = true;
 
@@ -30,7 +29,6 @@ var usersByTumblrName = {};
 
 everyauth.everymodule
     .findUserById( function (id, callback) {
-        console.log("check id "+id);
         callback(null, usersById[id]);
     });
 
@@ -38,11 +36,6 @@ everyauth.tumblr
     .consumerKey(config.consumerKey)
     .consumerSecret(config.consumerSecret)
     .findOrCreateUser( function (sess, accessToken, accessSecret, user) {
-        console.log("tumblr");
-        console.log(sess);
-        console.log(accessToken);
-        console.log(accessSecret);
-        console.log(user);
         user.accessToken = accessToken;
         user.accessSecret = accessSecret;
         return usersByTumblrName[user.name] ||
