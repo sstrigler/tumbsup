@@ -7,7 +7,6 @@ var express = require('express'),
 routes = require('./routes'),
 config = require('./config'),
 everyauth = require('everyauth'),
-tumblr = require('ntumblr'),
 util = require('util');
 
 everyauth.debug = true;

@@ -1,0 +1,11 @@
+*.swp 
+*~ 
+.DS_Store
+node_modules
+.npm
+*.log
+.cloudnode.appconfig
+.nodester.appconfig
+.monitor
+testing
+*_dont-git-me-bro
