@@ -8,8 +8,6 @@ routes = require('./routes'),
 config = require('./config'),
 everyauth = require('everyauth');
 
-everyauth.debug = true;
-
 var usersById = {};
 var nextUserId = 0;
 
