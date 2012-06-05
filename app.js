@@ -7,7 +7,8 @@ var express = require('express'),
 routes = require('./routes'),
 config = require('./config'),
 everyauth = require('everyauth'),
-tumblr = require('ntumblr');
+tumblr = require('ntumblr'),
+util = require('util');
 
 everyauth.debug = true;
 
@@ -43,6 +44,8 @@ everyauth.tumblr
         console.log(accessToken);
         console.log(accessSecret);
         console.log(user);
+        user.accessToken = accessToken;
+        user.accessSecret = accessSecret;
         return usersByTumblrName[user.name] ||
             (usersByTumblrName[user.name] = addUser('tumblr', user));
     })
@@ -79,15 +82,7 @@ everyauth.helpExpress(app);
 
 // Routes
 
-app.get('/', function(req, res) {
-    console.log("/");
-    console.log(req.loggedIn);
-    if (!req.loggedIn) {
-        res.redirect("/auth/tumblr");
-    } else {
-        res.render('index', { title: 'tumblikes '+req.user.name });
-    }
-});
+app.get('/', routes.index);
 
 app.listen(3000, function(){
     console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

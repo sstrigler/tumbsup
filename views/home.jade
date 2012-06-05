@@ -1,0 +1,12 @@
+- if (!everyauth.loggedIn)
+  h2 Not Authenticated
+  #tumblr-login
+    a(href='/auth/tumblr', style='border: 0px')
+      img(src='http://assets.tumblr.com/images/logo.png?alpha&6')
+- else
+  h2 Authenticated
+  - if (everyauth.tumblr)
+    h3 Tumblr User Data
+    p= JSON.stringify(everyauth.tumblr.user)  
+  h3
+    a(href='/logout') Logout
