@@ -6,8 +6,10 @@
 var express = require('express'),
 routes = require('./routes'),
 config = require('./config'),
+util = require('util'),
 everyauth = require('everyauth'),
-io = require('socket.io');
+io = require('socket.io'),
+parseCookie = require('connect').utils.parseCookie;
 
 // Session store
 var RedisStore = require('connect-redis')(express);
@@ -22,7 +24,6 @@ everyauth.tumblr
     .redirectPath('/');
 
 var app = module.exports = express.createServer();
-io = io.listen(app);
 // Configuration
 
 app.configure(function(){
@@ -33,7 +34,8 @@ app.configure(function(){
     app.use(express.cookieParser());
     app.use(express.session({
 		'store': sessionStore,
-        'secret': config.session_secret
+        'secret': config.session_secret,
+        'key': 'express.sid'
     }));
     app.use(everyauth.middleware());
     app.use(express.methodOverride());
@@ -59,7 +61,29 @@ app.listen(3000, function(){
     console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
 
-io.sockets.on('connection', function(socket) {
+var sio = io.listen(app);
+sio.set('authorization', function(data, accept) {
+    if (data.headers.cookie) {
+        data.cookie = parseCookie(data.headers.cookie);
+        data.sessionID = data.cookie['express.sid'];
+        // (literally) get the session data from the session store
+        sessionStore.get(data.sessionID, function (err, session) {
+            if (err || !session) {
+                // if we cannot grab a session, turn down the connection
+                accept('Error', false);
+            } else {
+                // save the session data and accept the connection
+                data.session = session;
+                accept(null, true);
+            }
+        });
+    } else {
+       return accept('No cookie transmitted.', false);
+    }
+});
+
+sio.sockets.on('connection', function(socket) {
+    console.log('got handshake:\n'+util.inspect(socket.handshake.session, false, null, true));
     socket.on('get_likes', function(data, fn) {
         console.log('getting likes');
         fn('hallo welt');
