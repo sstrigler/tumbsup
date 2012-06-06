@@ -6,12 +6,13 @@
               },
     "version": "0.0.1",
     "keywords": ["tumblr", "client", "user", "likes", "backup"],
-    "private": true,
+    "repository" : { "type":"git", "url":"https://github.com/sstrigler/tumblikes.git" },
     "dependencies": {
         "express": "2.5.8",
         "jade": ">= 0.0.1",
         "everyauth": ">=0.2.32",
-        "tumblr2": ">=0.1.6"
+        "tumblr2": ">=0.1.6",
+        "connect-redis" : ">=1.0.7"
     },
     "main": "app.js"
 }

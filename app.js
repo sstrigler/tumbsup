@@ -8,36 +8,15 @@ routes = require('./routes'),
 config = require('./config'),
 everyauth = require('everyauth');
 
-var usersById = {};
-var nextUserId = 0;
-
-function addUser (source, sourceUser) {
-  var user;
-  if (arguments.length === 1) { // password-based
-    user = sourceUser = source;
-    user.id = ++nextUserId;
-    return usersById[nextUserId] = user;
-  } else { // non-password-based
-    user = usersById[++nextUserId] = {id: nextUserId};
-    user[source] = sourceUser;
-  }
-  return user;
-}
-var usersByTumblrName = {};
-
-everyauth.everymodule
-    .findUserById( function (id, callback) {
-        callback(null, usersById[id]);
-    });
+// Session store
+var RedisStore = require('connect-redis')(express);
+var sessionStore = new RedisStore();
 
 everyauth.tumblr
     .consumerKey(config.consumerKey)
     .consumerSecret(config.consumerSecret)
     .findOrCreateUser( function (sess, accessToken, accessSecret, user) {
-        user.accessToken = accessToken;
-        user.accessSecret = accessSecret;
-        return usersByTumblrName[user.name] ||
-            (usersByTumblrName[user.name] = addUser('tumblr', user));
+        return true;
     })
     .redirectPath('/');
 
@@ -52,7 +31,8 @@ app.configure(function(){
     app.use(express.bodyParser());
     app.use(express.cookieParser());
     app.use(express.session({
-        "secret": config.session_secret
+		'store': sessionStore,
+        'secret': config.session_secret
     }));
     app.use(everyauth.middleware());
     app.use(express.methodOverride());
