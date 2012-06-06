@@ -6,7 +6,8 @@
 var express = require('express'),
 routes = require('./routes'),
 config = require('./config'),
-everyauth = require('everyauth');
+everyauth = require('everyauth'),
+io = require('socket.io');
 
 // Session store
 var RedisStore = require('connect-redis')(express);
@@ -21,7 +22,7 @@ everyauth.tumblr
     .redirectPath('/');
 
 var app = module.exports = express.createServer();
-
+io = io.listen(app);
 // Configuration
 
 app.configure(function(){
@@ -56,4 +57,11 @@ app.get('/', routes.index);
 
 app.listen(3000, function(){
     console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+});
+
+io.sockets.on('connection', function(socket) {
+    socket.on('get_likes', function(data, fn) {
+        console.log('getting likes');
+        fn('hallo welt');
+    });
 });

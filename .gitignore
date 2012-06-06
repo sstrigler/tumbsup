@@ -1,5 +1,6 @@
 node_modules/connect-redis/
 node_modules/express/
 node_modules/jade/
+node_modules/socket.io/
 node_modules/tumblr2/
 config.js

@@ -8,20 +8,23 @@ Tumblr = require('tumblr2');
 
 exports.index = function(req, res){
     if (req.session && req.session.auth && req.session.auth.loggedIn) {
-        var t = req.session.auth.tumblr;
-        var c = {
-            consumerKey: config.consumerKey,
-            consumerSecret: config.consumerSecret,
-            accessTokenKey: t.accessToken,
-            accessTokenSecret: t.accessTokenSecret
-        };
-        console.log(c);
-        var tumblr = new Tumblr(c);
-        tumblr.getUserLikes(function(err, response) {
-            console.log(util.inspect(response, false, null, true));
-            res.render('home', { title: 'tumblikes', likes: response.liked_posts });
+        new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
+            console.log("got user info:\n"+util.inspect(info, false, null, true));
+            res.render('home', { title: 'tumblikes', info: info });
         });
     } else {
         res.render('login', { title: 'tumblikes' });
     }
 };
+
+function getOAuthConfig(session) {
+    var t = session.auth.tumblr;
+    var c = {
+        consumerKey: config.consumerKey,
+            consumerSecret: config.consumerSecret,
+            accessTokenKey: t.accessToken,
+            accessTokenSecret: t.accessTokenSecret
+        };
+    console.log("got oauth config:\n" + util.inspect(c, false, null, true));
+    return c;
+}

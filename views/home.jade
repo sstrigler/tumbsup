@@ -1,10 +1,16 @@
-h2 Welcome, #{everyauth.tumblr.user.name}
+script(src='/socket.io/socket.io.js')
+script
+  var socket = io.connect('http://localhost:3000');
+  function getLikes() {
+    socket.emit('get_likes', null, function(likes) {
+      console.log(likes);
+    })
+    return false;
+  }
+h2 Welcome, #{everyauth.tumblr.user.name}!
+p 
+  | You've got #{info.user.likes} likes. 
+  button(onclick='return getLikes()') Get'em all!
+hr
 h3
   a(href='/logout') Logout
-ul
-  each like in likes
-    li= like.blog_name
-        if like.photos
-           each photo in like.photos
-             div 
-                 img(src='#{photo.original_size.url}')
