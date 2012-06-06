@@ -9,6 +9,7 @@ config = require('./config'),
 util = require('util'),
 everyauth = require('everyauth'),
 io = require('socket.io'),
+Tumblr = require('tumblr2'),
 parseCookie = require('connect').utils.parseCookie;
 
 // Session store
@@ -86,6 +87,21 @@ sio.sockets.on('connection', function(socket) {
     console.log('got handshake:\n'+util.inspect(socket.handshake.session, false, null, true));
     socket.on('get_likes', function(data, fn) {
         console.log('getting likes');
-        fn('hallo welt');
+        new Tumblr(getOAuthConfig(socket.handshake.session)).getUserLikes(function(err, res) {
+            console.log("got likes:\n"+util.inspect(res, false, null, true));
+            fn({likes: res.liked_posts.length});
+        });
     });
 });
+
+function getOAuthConfig(session) {
+    var t = session.auth.tumblr;
+    var c = {
+        consumerKey: config.consumerKey,
+            consumerSecret: config.consumerSecret,
+            accessTokenKey: t.accessToken,
+            accessTokenSecret: t.accessTokenSecret
+        };
+    console.log("got oauth config:\n" + util.inspect(c, false, null, true));
+    return c;
+}
