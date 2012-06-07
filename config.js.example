@@ -4,7 +4,7 @@ module.exports = {
     download_dir: 'downloads/',
     host: 'http://localhost:3000/',
     likes_limit: 10,
+    port: 3000,
     session_secret: 'topSecret',
     tmp_dir: '/tmp'
-
 };
