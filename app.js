@@ -60,7 +60,7 @@ app.get('/', function(req, res){
         new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
             console.log("got user info:\n"+util.inspect(info, false, null, true));
             req.session.likes = info.user.likes;
-            res.render('home', { title: 'tumblikes', info: info, host: config.host });
+            res.render('home', { title: 'tumblikes', info: info, host: config.host, limit: config.likes_limit });
         });
     } else {
         res.render('login', { title: 'tumblikes' });
@@ -150,7 +150,7 @@ sio.sockets.on('connection', function(socket) {
                             });
                             zip.on('exit', function(code) {
                                 console.log('child process exited with code ' + code);
-                                socket.emit('status', '<a href="'+config.host+zipfile+'">Your ZIP is ready for download!</a>');
+                                socket.emit('status', '<a href="'+config.host+zipfile+'">Your ZIP archive has been created sucessfully. Click here to download!</a>');
                                 socket.emit('done');
                             });
                         }

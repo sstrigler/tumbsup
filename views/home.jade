@@ -23,17 +23,20 @@ script
     socket.on('done', function() {
       socket.removeAllListeners('progress');
       socket.removeAllListeners('status');
-      $(button).show();
+      //$(button).show();
     }); 
 
     return false;
   }
 h2 Welcome, #{everyauth.tumblr.user.name}!
 p 
-  | You've got #{info.user.likes} likes. 
-  button(onclick='return getLikes(this)') Get'em all!
+  | You've got #{info.user.likes} likes.
+  if info.user.likes > limit
+    |  There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!
   div#progressbar
   div#status
+  div
+    button(onclick='return getLikes(this)') Get'em all!
 hr
 h3
   a(href='/logout') Logout
