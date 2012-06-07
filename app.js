@@ -4,7 +4,6 @@
  */
 
 var express = require('express'),
-routes = require('./routes'),
 config = require('./config'),
 util = require('util'),
 everyauth = require('everyauth'),
@@ -60,7 +59,7 @@ app.get('/', function(req, res){
     if (req.session && req.session.auth && req.session.auth.loggedIn) {
         new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
             console.log("got user info:\n"+util.inspect(info, false, null, true));
-            res.render('home', { title: 'tumblikes', info: info });
+            res.render('home', { title: 'tumblikes', info: info, host: config.host });
         });
     } else {
         res.render('login', { title: 'tumblikes' });

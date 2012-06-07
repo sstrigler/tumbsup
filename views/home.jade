@@ -3,16 +3,18 @@ script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
 script(src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js')
 script(src='/socket.io/socket.io.js')
 script
-  var socket = io.connect('http://localhost:3000');
+  var socket = io.connect('#{host}');
   $(document).ready(function() {
       $('#progressbar').progressbar({value: 0});
   });
-  function getLikes() {
+  function getLikes(button) {
+    $(button).hide();
     var num_photos = photos_received = 0;
+    $('#progressbar').progressbar("option", "value", 0);
+    $('#download').attr('href', '').text('');
     socket.emit('get_likes', null, function(num) {
       num_photos = num;
       console.log("got "+num_photos+" photos to load");
-      $('#progressbar').progressbar("option", "value", 0);
     });
     socket.on('file', function(filename) {
       photos_received++;
@@ -23,14 +25,19 @@ script
       }
     });
     socket.on('download', function(download) {
+      console.log(download);
       $('#download').attr('href',download).text('Your ZIP is ready for download!');
-     }); 
+      socket.removeAllListeners('file');
+      socket.removeAllListeners('download');
+      $(button).show();
+    }); 
+
     return false;
   }
 h2 Welcome, #{everyauth.tumblr.user.name}!
 p 
   | You've got #{info.user.likes} likes. 
-  button(onclick='return getLikes()') Get'em all!
+  button(onclick='return getLikes(this)') Get'em all!
   div#progressbar
   div
     a#download
