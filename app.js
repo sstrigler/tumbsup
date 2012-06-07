@@ -162,11 +162,7 @@ function addFile(opts, filename, socket, num_photos, session){
         socket.emit('status', 'Creating ZIP file...');
         var zipfile = config.download_dir+session.auth.tumblr.user.name+'.zip';
         zipOpts = ['-j', process.cwd()+'/public/'+zipfile].concat(opts.zipOpts);
-        console.log(opts.zipOpts);
         var zip = spawn('zip', opts.zipOpts);
-        zip.stdout.on('data', function (data) {
-            console.log('stdout: ' + data);
-        });
         zip.stderr.on('data', function (data) {
             console.log('stderr: ' + data);
         });
