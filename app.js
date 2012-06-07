@@ -56,7 +56,16 @@ everyauth.helpExpress(app);
 
 // Routes
 
-app.get('/', routes.index);
+app.get('/', function(req, res){
+    if (req.session && req.session.auth && req.session.auth.loggedIn) {
+        new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
+            console.log("got user info:\n"+util.inspect(info, false, null, true));
+            res.render('home', { title: 'tumblikes', info: info });
+        });
+    } else {
+        res.render('login', { title: 'tumblikes' });
+    }
+});
 
 app.listen(3000, function(){
     console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
