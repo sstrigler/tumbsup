@@ -11,24 +11,18 @@ script
     $(button).hide();
     var num_photos = photos_received = 0;
     $('#progressbar').progressbar("option", "value", 0);
-    $('#download').attr('href', '').text('');
-    socket.emit('get_likes', null, function(num) {
-      num_photos = num;
-      console.log("got "+num_photos+" photos to load");
+    socket.emit('get_likes');
+    socket.on('progress', function(progress) {
+      console.log(progress);
+      $('#progressbar').progressbar("option", "value", progress);
     });
-    socket.on('file', function(filename) {
-      photos_received++;
-      console.log(photos_received);
-      $('#progressbar').progressbar("option", "value", (photos_received/num_photos)*100);
-      if (photos_received == num_photos) {
-        console.log("done");
-      }
+    socket.on('status', function(status) {
+      console.log(status);
+      $('#status').html(status);
     });
-    socket.on('download', function(download) {
-      console.log(download);
-      $('#download').attr('href',download).text('Your ZIP is ready for download!');
-      socket.removeAllListeners('file');
-      socket.removeAllListeners('download');
+    socket.on('done', function() {
+      socket.removeAllListeners('progress');
+      socket.removeAllListeners('status');
       $(button).show();
     }); 
 
@@ -39,8 +33,7 @@ p
   | You've got #{info.user.likes} likes. 
   button(onclick='return getLikes(this)') Get'em all!
   div#progressbar
-  div
-    a#download
+  div#status
 hr
 h3
   a(href='/logout') Logout
