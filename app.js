@@ -153,7 +153,6 @@ sio.sockets.on('connection', function(socket) {
 });
 
 function addFile(opts, filename, socket, num_photos, session){
-    console.log(opts);
     opts.zipOpts.push(filename);
     opts.photos_got++;
     socket.emit('progress', (opts.photos_got/num_photos)*100);
