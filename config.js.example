@@ -1,5 +1,10 @@
 module.exports = {
-    session_secret: 'topSecret',
     consumerKey: 'tumblr_api_key',
-    consumerSecret: 'tumblr_api_secret'
+    consumerSecret: 'tumblr_api_secret',
+    download_dir: 'downloads/',
+    host: 'http://localhost:3000/',
+    likes_limit: 10,
+    session_secret: 'topSecret',
+    tmp_dir: '/tmp'
+
 };
