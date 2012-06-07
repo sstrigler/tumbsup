@@ -111,7 +111,7 @@ sio.sockets.on('connection', function(socket) {
 
         var num_likes = Math.min(session.likes, config.likes_limit);
         console.log("getting "+num_likes+" likes");
-        socket.emit('status', 'Determining number of photos to download...');
+        socket.emit('status', 'Determining photos to download...');
         socket.emit('progress', 0);
         getPhotoUrls(getOAuthConfig(session), socket, [], num_likes, 0, function(urls) {
             var num_photos = urls.length;
