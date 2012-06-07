@@ -6,3 +6,4 @@ node_modules/socket.io/
 node_modules/tumblr2/
 public/downloads/*
 config.js
+*.log
