@@ -120,21 +120,18 @@ sio.sockets.on('connection', function(socket) {
             socket.emit('status', 'Downloading '+num_photos+' photos...');
             socket.emit('progress', 0);
 
-            var opts = {zipOpts: [],
-                        photos_got: 0
-                       };
+            var opts = 0;
 
             urls.forEach(function(url) {
                 console.log("checking url "+url);
                 url = Url.parse(url);
-
 
                 var filename = dir+url.path.substring(url.path.lastIndexOf('/'));
                 try {
                     fs.statSync(filename);
                     console.log("file already downloaded "+filename);
                     // no need to download
-                    opts = addFile(opts, filename, socket, num_photos, session);
+                    opts = addFile(opts, filename, socket, num_photos, session, dir);
                 } catch(e) {
                     console.log("getting file "+filename);
                     http.get(url, function(response) {
@@ -143,7 +140,7 @@ sio.sockets.on('connection', function(socket) {
                         response.on('end', function() {
                             file.end();
                             console.log("wrote file "+filename);
-                            opts = addFile(opts, filename, socket, num_photos, session);
+                            opts = addFile(opts, filename, socket, num_photos, session, dir);
                         });
                     });
                 }
@@ -152,17 +149,16 @@ sio.sockets.on('connection', function(socket) {
     });
 });
 
-function addFile(opts, filename, socket, num_photos, session){
-    opts.zipOpts.push(filename);
-    opts.photos_got++;
-    socket.emit('progress', (opts.photos_got/num_photos)*100);
-    if (opts.photos_got == num_photos) {
+function addFile(photos_got, filename, socket, num_photos, session, dir){
+    photos_got++;
+    socket.emit('progress', (photos_got/num_photos)*100);
+    if (photos_got == num_photos) {
         // we're done downloading
         // zip the file
         socket.emit('status', 'Creating ZIP file...');
         var zipfile = config.download_dir+session.auth.tumblr.user.name+'.zip';
-        zipOpts = ['-j', process.cwd()+'/public/'+zipfile].concat(opts.zipOpts);
-        var zip = spawn('zip', opts.zipOpts);
+        var zipOpts = ['-qjr', process.cwd()+'/public/'+zipfile, dir]
+        var zip = spawn('zip', zipOpts);
         zip.stderr.on('data', function (data) {
             console.log('stderr: ' + data);
         });
@@ -172,7 +168,7 @@ function addFile(opts, filename, socket, num_photos, session){
             socket.emit('done');
         });
     }
-    return opts;
+    return photos_got;
 }
 
 function getPhotoUrls(config, socket, urls, limit, offset, cb) {
