@@ -128,7 +128,6 @@ sio.sockets.on('connection', function(socket) {
 function getPhotoUrls(oAuthConfig, offset, cb) {
     console.log(offset);
     new Tumblr(oAuthConfig).getUserLikes({limit: 20, offset: offset}, function(err, res) {
-        console.log(offset);
         var urls = [];
         if (err) {
             console.log("error: "+err);
@@ -153,7 +152,7 @@ var fs = require('fs');
 function getPhotos(urls, socket) {
     var num_photos = urls.length;
     console.log("got "+num_photos+" photo urls");
-    
+    console.log(urls);
     socket.emit('status', 'Downloading '+num_photos+' photos...');
     socket.emit('progress', 0);
 
@@ -176,6 +175,10 @@ function getPhotos(urls, socket) {
                     console.log("wrote file "+filename);
                     files.add(filename);
                 });
+                response.on('close', function(err) {
+                    console.error(err);
+                    files.dec();
+                });
             });
         }
     });
@@ -183,14 +186,24 @@ function getPhotos(urls, socket) {
 
 function FileStore(num_files, socket) {
     this.files = [];
+    this.num_files = num_files;
  
     this.add = function(filename) {
-        this.files.push(filename);
-        socket.emit('progress', (this.files.length/num_files)*100);
-        if (this.files.length == num_files) {
+        if (this.files.indexOf(filename) != -1) {
+            console.log("got a dup! "+filename);
+            this.dec();
+        } else {
+            this.files.push(filename);
+            socket.emit('progress', (this.files.length/this.num_files)*100);
+        }
+        if (this.files.length == this.num_files) {
             // we're done downloading
             createZIP(this.files, socket);
         }
+    };
+
+    this.dec = function() {
+        this.num_files--;
     };
 }
 
