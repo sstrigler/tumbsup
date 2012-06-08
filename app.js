@@ -58,7 +58,7 @@ everyauth.helpExpress(app);
 app.get('/', function(req, res){
     if (req.session && req.session.auth && req.session.auth.loggedIn) {
         new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
-            console.log("got user info:\n"+util.inspect(info, false, null, true));
+            console.log("got user info:\n"+util.inspect(info));
             req.session.likes = info.user.likes;
             res.render('home', { title: 'tumblikes', info: info, host: config.host, limit: config.likes_limit });
         });
@@ -94,7 +94,7 @@ sio.set('authorization', function(data, accept) {
 
 sio.sockets.on('connection', function(socket) {
     var session = socket.handshake.session;
-    console.log('got handshake:\n'+util.inspect(session, false, null, true));
+    console.log('got handshake:\n'+util.inspect(session));
 
     socket.on('get_likes', function(data) {
         console.log('getting likes for '+session.auth.tumblr.user.name);
@@ -126,13 +126,15 @@ sio.sockets.on('connection', function(socket) {
 });
 
 function getPhotoUrls(oAuthConfig, offset, cb) {
-    console.log(offset);
     new Tumblr(oAuthConfig).getUserLikes({limit: 20, offset: offset}, function(err, res) {
+        console.log("got likes with offset "+offset);
+
         var urls = [];
         if (err) {
             console.log("error: "+err);
             return cb(urls);
         }
+
         res.liked_posts.forEach(function(like) {
             if (like.photos) {
                 like.photos.forEach(function(photo) {
@@ -152,7 +154,7 @@ var fs = require('fs');
 function getPhotos(urls, socket) {
     var num_photos = urls.length;
     console.log("got "+num_photos+" photo urls");
-    console.log(urls);
+
     socket.emit('status', 'Downloading '+num_photos+' photos...');
     socket.emit('progress', 0);
 
@@ -194,8 +196,8 @@ function FileStore(num_files, socket) {
             this.dec();
         } else {
             this.files.push(filename);
-            socket.emit('progress', (this.files.length/this.num_files)*100);
         }
+        socket.emit('progress', (this.files.length/this.num_files)*100);
         if (this.files.length == this.num_files) {
             // we're done downloading
             createZIP(this.files, socket);
