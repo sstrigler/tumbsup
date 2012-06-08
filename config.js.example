@@ -4,7 +4,7 @@ module.exports = {
     consumerSecret: 'tumblr_api_secret',
     download_dir: 'downloads/',
     host: 'http://localhost:3000/',
-    likes_limit: 10,
+    likes_limit: 1000, // currently no more than 1000 supported by Tumblr API
     port: 3000,
     session_secret: 'topSecret'
 };
