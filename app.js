@@ -99,7 +99,6 @@ sio.sockets.on('connection', function(socket) {
     socket.on('get_likes', function(data) {
         console.log('getting likes for '+session.auth.tumblr.user.name);
         console.log(session.likes);
-        // TODO make sure name isn't a filesystem path and a valid name for a file
 
         var num_likes = Math.min(session.likes, config.likes_limit);
         console.log("getting "+num_likes+" likes");
@@ -114,19 +113,21 @@ sio.sockets.on('connection', function(socket) {
             all_urls = all_urls.concat(urls);
             socket.emit('progress', (cnt/loops)*100);
             if (cnt == loops) {
-                getPhotos(all_urls, socket, session);
+                getPhotos(all_urls, socket);
             }
         };
         var offset = 0;
+        var oAuthConfig = getOAuthConfig(session);
         while (offset+20 <= num_likes) {
-            getPhotoUrls(getOAuthConfig(session), offset, cb);
+            getPhotoUrls(oAuthConfig, offset, cb);
             offset += 20;
         }
     });
 });
 
-function getPhotoUrls(config, offset, cb) {
-    new Tumblr(config).getUserLikes({limit: 20, offset: offset}, function(err, res) {
+function getPhotoUrls(oAuthConfig, offset, cb) {
+    console.log(offset);
+    new Tumblr(oAuthConfig).getUserLikes({limit: 20, offset: offset}, function(err, res) {
         console.log(offset);
         var urls = [];
         if (err) {
@@ -149,23 +150,21 @@ var path = require('path');
 var Url = require('url');
 var http = require('http');
 var fs = require('fs');
-function getPhotos(urls, socket, session) {
+function getPhotos(urls, socket) {
     var num_photos = urls.length;
     console.log("got "+num_photos+" photo urls");
     
     socket.emit('status', 'Downloading '+num_photos+' photos...');
     socket.emit('progress', 0);
 
-
-    var addFileOpts =  {files: [],
-                        num_files: num_photos};
+    var files = new FileStore(num_photos, socket);
     urls.forEach(function(url) {
         console.log("checking url "+url);
 
         var filename = config.cache_dir+url.substring(url.lastIndexOf('/')+1);
         if (path.existsSync(filename)) {
             console.log("file already downloaded "+filename);
-            addFileOpts = addFile(addFileOpts, filename, socket);
+            files.add(filename);
         } else {
             console.log("getting file "+filename);
             url = Url.parse(url);
@@ -175,21 +174,24 @@ function getPhotos(urls, socket, session) {
                 response.on('end', function() {
                     file.end();
                     console.log("wrote file "+filename);
-                    addFileOpts = addFile(addFileOpts, filename, socket);
+                    files.add(filename);
                 });
             });
         }
     });
 }
 
-function addFile(opts, filename, socket){
-    opts.files.push(filename);
-    socket.emit('progress', (opts.files.length/opts.num_files)*100);
-    if (opts.files.length == opts.num_files) {
-        // we're done downloading
-        createZIP(opts.files, socket);
-    }
-    return opts;
+function FileStore(num_files, socket) {
+    this.files = [];
+ 
+    this.add = function(filename) {
+        this.files.push(filename);
+        socket.emit('progress', (this.files.length/num_files)*100);
+        if (this.files.length == num_files) {
+            // we're done downloading
+            createZIP(this.files, socket);
+        }
+    };
 }
 
 var spawn = require('child_process').spawn;
