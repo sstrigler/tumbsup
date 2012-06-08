@@ -92,10 +92,6 @@ sio.set('authorization', function(data, accept) {
     }
 });
 
-var Url = require('url');
-var http = require('http');
-var fs = require('fs');
-var spawn = require('child_process').spawn;
 sio.sockets.on('connection', function(socket) {
     var session = socket.handshake.session;
     console.log('got handshake:\n'+util.inspect(session, false, null, true));
@@ -104,10 +100,6 @@ sio.sockets.on('connection', function(socket) {
         console.log('getting likes for '+session.auth.tumblr.user.name);
         console.log(session.likes);
         // TODO make sure name isn't a filesystem path and a valid name for a file
-        var dir = config.tmp_dir+'/'+session.auth.tumblr.user.name;
-        try {
-            fs.mkdirSync(dir);
-        } catch(e) { }
 
         var num_likes = Math.min(session.likes, config.likes_limit);
         console.log("getting "+num_likes+" likes");
@@ -122,7 +114,7 @@ sio.sockets.on('connection', function(socket) {
             all_urls = all_urls.concat(urls);
             socket.emit('progress', (cnt/loops)*100);
             if (cnt == loops) {
-                getPhotos(all_urls, socket, dir, session);
+                getPhotos(all_urls, socket, session);
             }
         };
         var offset = 0;
@@ -153,60 +145,77 @@ function getPhotoUrls(config, offset, cb) {
     });
 }
 
-function getPhotos(urls, socket, dir, session) {
+var path = require('path');
+var Url = require('url');
+var http = require('http');
+var fs = require('fs');
+function getPhotos(urls, socket, session) {
     var num_photos = urls.length;
     console.log("got "+num_photos+" photo urls");
     
     socket.emit('status', 'Downloading '+num_photos+' photos...');
     socket.emit('progress', 0);
 
-    var opts = 0;
 
+    var addFileOpts =  {files: [],
+                        num_files: num_photos};
     urls.forEach(function(url) {
         console.log("checking url "+url);
-        url = Url.parse(url);
 
-        var filename = dir+url.path.substring(url.path.lastIndexOf('/'));
-        try {
-            fs.statSync(filename);
+        var filename = config.cache_dir+url.substring(url.lastIndexOf('/')+1);
+        if (path.existsSync(filename)) {
             console.log("file already downloaded "+filename);
-            // no need to download
-            opts = addFile(opts, filename, socket, num_photos, session, dir);
-        } catch(e) {
+            addFileOpts = addFile(addFileOpts, filename, socket);
+        } else {
             console.log("getting file "+filename);
+            url = Url.parse(url);
             http.get(url, function(response) {
                 var file = fs.createWriteStream(filename);
                 response.on('data', function(chunk){ file.write(chunk); });
                 response.on('end', function() {
                     file.end();
                     console.log("wrote file "+filename);
-                    opts = addFile(opts, filename, socket, num_photos, session, dir);
+                    addFileOpts = addFile(addFileOpts, filename, socket);
                 });
             });
         }
     });
 }
 
-function addFile(photos_got, filename, socket, num_photos, session, dir){
-    photos_got++;
-    socket.emit('progress', (photos_got/num_photos)*100);
-    if (photos_got == num_photos) {
+function addFile(opts, filename, socket){
+    opts.files.push(filename);
+    socket.emit('progress', (opts.files.length/opts.num_files)*100);
+    if (opts.files.length == opts.num_files) {
         // we're done downloading
-        // zip the file
-        socket.emit('status', 'Creating ZIP file...');
-        var zipfile = config.download_dir+session.auth.tumblr.user.name+'.zip';
-        var zipOpts = ['-qjr', process.cwd()+'/public/'+zipfile, dir];
-        var zip = spawn('zip', zipOpts);
-        zip.stderr.on('data', function (data) {
-            console.log('stderr: ' + data);
-        });
-        zip.on('exit', function(code) {
-            console.log('child process exited with code ' + code);
-            socket.emit('status', '<a href="'+config.host+zipfile+'">Your ZIP archive has been created sucessfully. Click here to download!</a>');
-            socket.emit('done');
-        });
+        createZIP(opts.files, socket);
     }
-    return photos_got;
+    return opts;
+}
+
+var spawn = require('child_process').spawn;
+function createZIP(files, socket) {
+    var session = socket.handshake.session;
+
+    // zip the file
+    socket.emit('status', 'Creating ZIP file...');
+    var zipfile = config.download_dir+session.auth.tumblr.user.name+'.zip';
+    console.log(zipfile);
+
+    if (path.existsSync(process.cwd()+'/public/'+zipfile)) {
+        console.log("deleting old zip");
+        fs.unlinkSync(process.cwd()+'/public/'+zipfile);
+    }
+
+    var zipOpts = ['-qj', process.cwd()+'/public/'+zipfile].concat(files);
+    var zip = spawn('zip', zipOpts);
+    zip.stderr.on('data', function (data) {
+        console.log('stderr: ' + data);
+    });
+    zip.on('exit', function(code) {
+        console.log('child process exited with code ' + code);
+        socket.emit('status', '<a href="'+config.host+zipfile+'">Your ZIP archive has been created sucessfully. Click here to download!</a>');
+        socket.emit('done');
+    });
 }
 
 function getOAuthConfig(session) {
