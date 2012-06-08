@@ -113,17 +113,33 @@ sio.sockets.on('connection', function(socket) {
         console.log("getting "+num_likes+" likes");
         socket.emit('status', 'Determining photos to download...');
         socket.emit('progress', 0);
-        getPhotoUrls(getOAuthConfig(session), socket, session, [], dir, num_likes, 0, getPhotos);
+
+        var loops = Math.ceil(num_likes/20);
+        var cnt = 0;
+        var all_urls = [];
+        var cb = function(urls) {
+            cnt++;
+            all_urls = all_urls.concat(urls);
+            socket.emit('progress', (cnt/loops)*100);
+            if (cnt == loops) {
+                getPhotos(all_urls, socket, dir, session);
+            }
+        };
+        var offset = 0;
+        while (offset+20 <= num_likes) {
+            getPhotoUrls(getOAuthConfig(session), offset, cb);
+            offset += 20;
+        }
     });
 });
 
-function getPhotoUrls(config, socket, session, urls, dir, limit, offset, cb) {
+function getPhotoUrls(config, offset, cb) {
     new Tumblr(config).getUserLikes({limit: 20, offset: offset}, function(err, res) {
         console.log(offset);
+        var urls = [];
         if (err) {
             console.log("error: "+err);
-            socket.emit('status', err);
-            return cb(urls, socket, dir, session);
+            return cb(urls);
         }
         res.liked_posts.forEach(function(like) {
             if (like.photos) {
@@ -133,13 +149,7 @@ function getPhotoUrls(config, socket, session, urls, dir, limit, offset, cb) {
             }
         });
 
-        socket.emit('progress', ((offset+20)/limit)*100);
-
-        if (offset+20 < limit) {
-            getPhotoUrls(config, socket, session, urls, dir, limit, offset+20, cb);
-        } else {
-            cb(urls, socket, dir, session);
-        }
+        cb(urls);
     });
 }
 
