@@ -113,41 +113,69 @@ sio.sockets.on('connection', function(socket) {
         console.log("getting "+num_likes+" likes");
         socket.emit('status', 'Determining photos to download...');
         socket.emit('progress', 0);
-        getPhotoUrls(getOAuthConfig(session), socket, [], num_likes, 0, function(urls) {
-            var num_photos = urls.length;
-            console.log("got "+num_photos+" photo urls");
-            
-            socket.emit('status', 'Downloading '+num_photos+' photos...');
-            socket.emit('progress', 0);
-
-            var opts = 0;
-
-            urls.forEach(function(url) {
-                console.log("checking url "+url);
-                url = Url.parse(url);
-
-                var filename = dir+url.path.substring(url.path.lastIndexOf('/'));
-                try {
-                    fs.statSync(filename);
-                    console.log("file already downloaded "+filename);
-                    // no need to download
-                    opts = addFile(opts, filename, socket, num_photos, session, dir);
-                } catch(e) {
-                    console.log("getting file "+filename);
-                    http.get(url, function(response) {
-                        var file = fs.createWriteStream(filename);
-                        response.on('data', function(chunk){ file.write(chunk); });
-                        response.on('end', function() {
-                            file.end();
-                            console.log("wrote file "+filename);
-                            opts = addFile(opts, filename, socket, num_photos, session, dir);
-                        });
-                    });
-                }
-            });
-        });
+        getPhotoUrls(getOAuthConfig(session), socket, session, [], dir, num_likes, 0, getPhotos);
     });
 });
+
+function getPhotoUrls(config, socket, session, urls, dir, limit, offset, cb) {
+    new Tumblr(config).getUserLikes({limit: 20, offset: offset}, function(err, res) {
+        console.log(offset);
+        if (err) {
+            console.log("error: "+err);
+            socket.emit('status', err);
+            return cb(urls, socket, dir, session);
+        }
+        res.liked_posts.forEach(function(like) {
+            if (like.photos) {
+                like.photos.forEach(function(photo) {
+                    urls.push(photo.original_size.url);
+                });
+            }
+        });
+
+        socket.emit('progress', ((offset+20)/limit)*100);
+
+        if (offset+20 < limit) {
+            getPhotoUrls(config, socket, session, urls, dir, limit, offset+20, cb);
+        } else {
+            cb(urls, socket, dir, session);
+        }
+    });
+}
+
+function getPhotos(urls, socket, dir, session) {
+    var num_photos = urls.length;
+    console.log("got "+num_photos+" photo urls");
+    
+    socket.emit('status', 'Downloading '+num_photos+' photos...');
+    socket.emit('progress', 0);
+
+    var opts = 0;
+
+    urls.forEach(function(url) {
+        console.log("checking url "+url);
+        url = Url.parse(url);
+
+        var filename = dir+url.path.substring(url.path.lastIndexOf('/'));
+        try {
+            fs.statSync(filename);
+            console.log("file already downloaded "+filename);
+            // no need to download
+            opts = addFile(opts, filename, socket, num_photos, session, dir);
+        } catch(e) {
+            console.log("getting file "+filename);
+            http.get(url, function(response) {
+                var file = fs.createWriteStream(filename);
+                response.on('data', function(chunk){ file.write(chunk); });
+                response.on('end', function() {
+                    file.end();
+                    console.log("wrote file "+filename);
+                    opts = addFile(opts, filename, socket, num_photos, session, dir);
+                });
+            });
+        }
+    });
+}
 
 function addFile(photos_got, filename, socket, num_photos, session, dir){
     photos_got++;
@@ -157,7 +185,7 @@ function addFile(photos_got, filename, socket, num_photos, session, dir){
         // zip the file
         socket.emit('status', 'Creating ZIP file...');
         var zipfile = config.download_dir+session.auth.tumblr.user.name+'.zip';
-        var zipOpts = ['-qjr', process.cwd()+'/public/'+zipfile, dir]
+        var zipOpts = ['-qjr', process.cwd()+'/public/'+zipfile, dir];
         var zip = spawn('zip', zipOpts);
         zip.stderr.on('data', function (data) {
             console.log('stderr: ' + data);
@@ -171,33 +199,6 @@ function addFile(photos_got, filename, socket, num_photos, session, dir){
     return photos_got;
 }
 
-function getPhotoUrls(config, socket, urls, limit, offset, cb) {
-    new Tumblr(config).getUserLikes({limit: 20, offset: offset}, function(err, res) {
-        console.log(offset);
-        if (err) {
-            console.log(err);
-            socket.emit('status', err);
-            return cb(urls);
-        }
-        res.liked_posts.forEach(function(like) {
-            if (like.photos) {
-                like.photos.forEach(function(photo) {
-                    urls.push(photo.original_size.url);
-                });
-            }
-        });
-
-        socket.emit('progress', ((offset+20)/limit)*100);
-
-        if (offset+20 < limit) {
-            getPhotoUrls(config, socket, urls, limit, offset+20, cb);
-        } else {
-            cb(urls);
-        }
-    });
-}
-
-
 function getOAuthConfig(session) {
     var t = session.auth.tumblr;
     var c = {
@@ -206,6 +207,5 @@ function getOAuthConfig(session) {
             accessTokenKey: t.accessToken,
             accessTokenSecret: t.accessTokenSecret
         };
-//    console.log("got oauth config:\n" + util.inspect(c, false, null, true));
     return c;
 }
