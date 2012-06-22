@@ -55,12 +55,13 @@ div#container
     a#user_url(href="#{everyauth.tumblr.user.url}", target="_blank")= everyauth.tumblr.user.url
   div#bubble
     div#nipple
-    div#info.spaced
-      | You've got #{info.user.likes} likes.
+    div#info.text
+      | You've got <strong>#{info.user.likes}</strong> likes.
       if info.user.likes > limit
-        |  There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!
-    div#progressbar
-    div#status.spaced
+        p 
+          | <strong>There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!</strong>
+    div#progressbar.sized
+    div#status.text.strong
       | &nbsp;
     div#buttons
       button#download.chrome.green(style='float:right')

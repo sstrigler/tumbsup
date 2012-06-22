@@ -1,8 +1,9 @@
-#tumblr-login {
- padding: 50px;
- text-align: center;
+.text {
+    font-size:20px;
+    color:#85898c;
+    margin:20px 0;
 }
 
-.spaced {
- padding: 15px 0px;
+strong, .strong {
+    color:#676e74;
 }
