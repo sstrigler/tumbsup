@@ -1,10 +1,15 @@
-h1= title
-p
-
-  | #{title} allows you to download all photos you liked at your
-  |  tumblr account. Click on the 'tumblr' logo below in order to
-  |  authorize us.
-
-#tumblr-login
-  a(href='/auth/tumblr', style='border: 0px')
-    img(src='http://assets.tumblr.com/images/logo.png?alpha&6')
+script
+  function login() {
+    document.location.href = '/auth/tumblr';
+  }
+div#container
+  div#bubble 
+    h1= title
+    h2
+      | Download all photos you liked at tumblr.
+    div#buttons(style='text-align:center')
+      button#download.chrome.green(onclick='return login();')
+        div.chrome_button
+          div.chrome_button_left
+          | Login
+          div.chrome_button_right
