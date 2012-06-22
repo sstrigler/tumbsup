@@ -28,6 +28,9 @@ script
 
     return false;
   }
+  function logout() {
+    document.location.href = '/logout';
+  }
 h2 Welcome, #{everyauth.tumblr.user.name}!
 p 
   | You've got #{info.user.likes} likes.
@@ -39,4 +42,4 @@ p
     button(onclick='return getLikes(this)') Get'em all!
 hr
 h3
-  a(href='/logout') Logout
+  button(onclick='return logout();') Logout
