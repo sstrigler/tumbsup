@@ -1,18 +1,8 @@
-body {
-  padding: 50px;
-/*  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; */
-  color: white;
-}
-
-a {
-  color: white;
-}
-
-#status {
- padding: 15px 0px;
-}
-
 #tumblr-login {
  padding: 50px;
  text-align: center;
+}
+
+.spaced {
+ padding: 15px 0px;
 }
