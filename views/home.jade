@@ -23,7 +23,6 @@ script
     });
     socket.on('download', function(download) {
       console.log(download);
-      $('#status').html('Successfully created ZIPFILE.');
       $('button#download').click(function() {
         document.location.href = download;
       }).show();
