@@ -1,6 +1,7 @@
 link(rel='stylesheet', href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css')
 script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
 script(src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js')
+script(src='http://platform.tumblr.com/v1/share.js')
 script(src='/socket.io/socket.io.js')
 script
     (function() {
@@ -45,23 +46,54 @@ script
   function logout() {
     document.location.href = '/logout';
   }
-h2 Welcome, #{everyauth.tumblr.user.name}!
-p 
-  | You've got #{info.user.likes} likes.
-  if info.user.likes > limit
-    |  There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!
-  div#progressbar
-  div#status
-  div
-    button#download Download ZIPFILE
-  div
-    button(onclick='return getLikes(this)') Get'em all!
-hr
-h3
-  button(onclick='return logout();') Logout
-  div(style='float:right;')
+div#container
+  div#user
+    a#user_avatar(href="#{everyauth.tumblr.user.url}",
+      target="_blank", 
+      style="background-image:url('#{avatar}')") 
+    a#user_name(href="#{everyauth.tumblr.user.url}", target="_blank")= everyauth.tumblr.user.name
+    a#user_url(href="#{everyauth.tumblr.user.url}", target="_blank")= everyauth.tumblr.user.url
+  div#bubble
+    div#nipple
+    div#info.spaced
+      | You've got #{info.user.likes} likes.
+      if info.user.likes > limit
+        |  There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!
+    div#progressbar
+    div#status.spaced
+      | &nbsp;
+    div#buttons
+      button#download.chrome.green(style='float:right')
+        div.chrome_button
+          div.chrome_button_left
+          | Download ZIPFILE
+          div.chrome_button_right
+      button.chrome.green(onclick='return getLikes(this)', style='float:right')
+        div.chrome_button
+          div.chrome_button_left
+          | Get'em all!
+          div.chrome_button_right
+      button.chrome(onclick='return logout();')
+        div.chrome_button
+          div.chrome_button_left
+          | Logout
+          div.chrome_button_right
+
+  hr(noshade, size=1)
+  div(style='float:right;').
     <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://tumblikes.x-berg.de:8000"></a>
     <noscript><a href="http://flattr.com/thing/722070/Tumblikes" target="_blank">
-    <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript>
-  div(style='float:right;').
-    <iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Ftumblikes.x-berg.de%3A8000&amp;send=false&amp;layout=standard&amp;width=300&amp;show_faces=false&amp;action=recommend&amp;colorscheme=dark&amp;font&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:300px; height:35px;" allowTransparency="true"></iframe>
+    <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript> 
+  span#tumblr_button_abc123
+      
+script
+  var tumblr_link_url = "http://tumblikes.x-berg.de:8000";
+  var tumblr_link_name = "tumblikes";
+  var tumblr_link_description = "Download all photos you liked on tumblr";
+script
+  var tumblr_button = document.createElement("a");
+  tumblr_button.setAttribute("href", "http://www.tumblr.com/share/link?url=" + encodeURIComponent(tumblr_link_url) + "&name=" + encodeURIComponent(tumblr_link_name) + "&description=" + encodeURIComponent(tumblr_link_description));
+  tumblr_button.setAttribute("title", "Share on Tumblr");
+  tumblr_button.setAttribute("style", "display:inline-block; text-indent:-9999px; overflow:hidden; width:129px; height:20px; background:url('http://platform.tumblr.com/v1/share_3T.png') top left no-repeat transparent;");
+  tumblr_button.innerHTML = "Share on Tumblr";
+  document.getElementById("tumblr_button_abc123").appendChild(tumblr_button);
