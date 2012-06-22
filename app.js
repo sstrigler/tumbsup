@@ -67,7 +67,7 @@ app.get('/', function(req, res){
                                  avatar: req.session.auth.tumblr.user['avatar-url']});
         });
     } else {
-        res.render('login', { title: 'tumblikes' });
+        res.render('login', { title: 'tumblikes', host: config.host });
     }
 });
 
