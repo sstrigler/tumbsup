@@ -210,18 +210,16 @@ function FileStore(num_files, socket) {
 }
 
 var spawn = require('child_process').spawn;
+var crypto = require('crypto');
 function createZIP(files, socket) {
     var session = socket.handshake.session;
 
     // zip the file
     socket.emit('status', 'Creating ZIP file...');
-    var zipfile = config.download_dir+session.auth.tumblr.user.name+'.zip';
+    var sha = crypto.createHash('sha1');
+    sha.update(Date.now()+session.auth.tumblr.user.name); // create hash for timestamp plus nick
+    var zipfile = config.download_dir+sha.digest('hex')+'.zip';
     console.log(zipfile);
-
-    if (path.existsSync(process.cwd()+'/public/'+zipfile)) {
-        console.log("deleting old zip");
-        fs.unlinkSync(process.cwd()+'/public/'+zipfile);
-    }
 
     var zipOpts = ['-qj', process.cwd()+'/public/'+zipfile].concat(files);
     var zip = spawn('zip', zipOpts);
