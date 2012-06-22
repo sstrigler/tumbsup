@@ -60,7 +60,11 @@ app.get('/', function(req, res){
         new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
             console.log("got user info:\n"+util.inspect(info));
             req.session.likes = info.user.likes;
-            res.render('home', { title: 'tumblikes', info: info, host: config.host, limit: config.likes_limit });
+            res.render('home', { title: 'tumblikes',
+                                 info: info,
+                                 host: config.host,
+                                 limit: config.likes_limit,
+                                 avatar: req.session.auth.tumblr.user['avatar-url']});
         });
     } else {
         res.render('login', { title: 'tumblikes' });
@@ -94,7 +98,7 @@ sio.set('authorization', function(data, accept) {
 
 sio.sockets.on('connection', function(socket) {
     var session = socket.handshake.session;
-    console.log('got handshake:\n'+util.inspect(session));
+    console.log('got handshake:\n'+util.inspect(session, false, null, true));
 
     socket.on('get_likes', function(data) {
         console.log('getting likes for '+session.auth.tumblr.user.name);
