@@ -6,6 +6,7 @@ script
   var socket = io.connect('#{host}');
   $(document).ready(function() {
       $('#progressbar').progressbar({value: 0});
+      $('button#download').hide();
   });
   function getLikes(button) {
     $(button).hide();
@@ -20,10 +21,16 @@ script
       console.log(status);
       $('#status').html(status);
     });
+    socket.on('download', function(download) {
+      console.log(download);
+      $('#status').html('Successfully created ZIPFILE.');
+      $('button#download').click(function() {
+        document.location.href = download;
+      }).show();
+    });
     socket.on('done', function() {
       socket.removeAllListeners('progress');
       socket.removeAllListeners('status');
-      //$(button).show();
     }); 
 
     return false;
@@ -38,6 +45,8 @@ p
     |  There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!
   div#progressbar
   div#status
+  div
+    button#download Download ZIPFILE
   div
     button(onclick='return getLikes(this)') Get'em all!
 hr

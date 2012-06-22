@@ -228,7 +228,7 @@ function createZIP(files, socket) {
     });
     zip.on('exit', function(code) {
         console.log('child process exited with code ' + code);
-        socket.emit('status', '<a href="'+config.host+zipfile+'">Your ZIP archive has been created sucessfully. Click here to download!</a>');
+        socket.emit('download', config.host+zipfile);
         socket.emit('done');
     });
 }
