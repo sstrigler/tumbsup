@@ -82,13 +82,13 @@ div#container
 
   hr(noshade, size=1)
   div(style='float:right;').
-    <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://tumblikes.x-berg.de:8000"></a>
+    <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="#{host}"></a>
     <noscript><a href="http://flattr.com/thing/722070/Tumblikes" target="_blank">
     <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript> 
   span#tumblr_button_abc123
       
 script
-  var tumblr_link_url = "http://tumblikes.x-berg.de:8000";
+  var tumblr_link_url = "#{host}";
   var tumblr_link_name = "tumblikes";
   var tumblr_link_description = "Download all photos you liked on tumblr";
 script
