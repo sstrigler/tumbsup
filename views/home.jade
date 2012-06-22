@@ -3,6 +3,14 @@ script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
 script(src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js')
 script(src='/socket.io/socket.io.js')
 script
+    (function() {
+        var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+        t.parentNode.insertBefore(s, t);
+    })();
+script
   var socket = io.connect('#{host}');
   $(document).ready(function() {
       $('#progressbar').progressbar({value: 0});
@@ -51,3 +59,7 @@ p
 hr
 h3
   button(onclick='return logout();') Logout
+  div(style='float:right;')
+    <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://tumblikes.x-berg.de:8000"></a>
+    <noscript><a href="http://flattr.com/thing/722070/Tumblikes" target="_blank">
+    <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript>
