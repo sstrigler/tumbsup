@@ -4,5 +4,36 @@ html
     title= title
     link(rel='stylesheet', href='http://assets.tumblr.com/stylesheets/compressed/auth.css?947')
     link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css')
     script(src='http://static.ak.fbcdn.net/connect/en_US/core.js')
-  body!= body
+    script(src='http://platform.tumblr.com/v1/share.js')
+    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
+    script(src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js')
+    script
+      (function() {
+        var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+        t.parentNode.insertBefore(s, t);
+      })();
+  body
+    div#container!= body
+      hr(noshade, size=1)
+      div(style='float:right;').
+        <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://tumblikes.x-berg.de:8888"></a>
+        <noscript><a href="http://flattr.com/thing/722104/tumblikes" target="_blank">
+        <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript>
+      span#tumblr_button_abc123
+
+script
+  var tumblr_link_url = "#{host}";
+  var tumblr_link_name = "tumblikes";
+  var tumblr_link_description = "Download all photos you liked on tumblr";
+script
+  var tumblr_button = document.createElement("a");
+  tumblr_button.setAttribute("href", "http://www.tumblr.com/share/link?url=" + encodeURIComponent(tumblr_link_url) + "&name=" + encodeURIComponent(tumblr_link_name) + "&description=" + encodeURIComponent(tumblr_link_description));
+  tumblr_button.setAttribute("title", "Share on Tumblr");
+  tumblr_button.setAttribute("style", "display:inline-block; text-indent:-9999px; overflow:hidden; width:129px; height:20px; background-color:red; background:url('http://platform.tumblr.com/v1/share_3.png') top left no-repeat transparent;");
+  tumblr_button.innerHTML = "Share on Tumblr";
+  document.getElementById("tumblr_button_abc123").appendChild(tumblr_button);
