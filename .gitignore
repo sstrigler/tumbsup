@@ -8,3 +8,4 @@ public/downloads/*
 cache/
 config.js
 *.log
+*flymake.js
