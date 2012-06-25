@@ -20,11 +20,11 @@ html
   body
     div#container!= body
       hr(noshade, size=1)
-      div(style='float:right;').
-        <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://tumblikes.x-berg.de"></a>
-        <noscript><a href="http://flattr.com/thing/723930/tumblikes" target="_blank">
-        <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript>
-      span#tumblr_button_abc123
+      div(style='float:right;')
+        span#tumblr_button_abc123
+      | <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://tumblikes.x-berg.de"></a>
+      | <noscript><a href="http://flattr.com/thing/723930/tumblikes" target="_blank">
+      | <img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" /></a></noscript>
 
 script
   var tumblr_link_url = "#{host}";
