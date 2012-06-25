@@ -4,7 +4,7 @@ div#bubble
       document.location.href = '/auth/tumblr';
     }
   h1= title
-  if error
+  if typeof error != 'undefined'
     div.error
      | <strong>ERROR!</strong> #{error}
   h2
