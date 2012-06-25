@@ -12,6 +12,12 @@ h2 {
     margin:20px 0;
 }
 
+.note {
+    font-size: 1em;
+    color:#85898c;
+    margin:20px 0;
+}
+
 strong, .strong {
     color:#676e74;
 }
