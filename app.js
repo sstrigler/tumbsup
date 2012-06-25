@@ -57,6 +57,8 @@ everyauth.helpExpress(app);
 // Routes
 
 app.get('/', function(req, res){
+    var pos = config.host.indexOf(req.headers.host);
+    if (pos != 7 && pos != 8) return res.redirect(config.host, 301);
     if (req.session && req.session.auth && req.session.auth.loggedIn) {
         new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
             console.log("got user info:\n"+util.inspect(info));
