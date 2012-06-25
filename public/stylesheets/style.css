@@ -21,3 +21,7 @@ h2 {
 strong, .strong {
     color:#676e74;
 }
+
+.error, .error strong {
+    color:#bf2f2f !important;
+}

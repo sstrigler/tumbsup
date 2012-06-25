@@ -21,6 +21,12 @@ everyauth.tumblr
     .findOrCreateUser( function (sess, accessToken, accessSecret, user) {
         return true;
     })
+    .handleAuthCallbackError( function (req, res) {
+        res.render('login', { title: 'tumblikes',
+                              host: config.host,
+                              error: 'You need to authorize tumblikes in order to make this work, sorry!'
+                            });
+    })
     .redirectPath('/');
 
 var app = module.exports = express.createServer();
@@ -194,7 +200,7 @@ function getPhotos(urls, socket) {
 function FileStore(num_files, socket) {
     this.files = [];
     this.num_files = num_files;
- 
+
     this.add = function(filename) {
         if (this.files.indexOf(filename) != -1) {
             console.log("got a dup! "+filename);
