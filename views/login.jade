@@ -6,8 +6,7 @@ div#bubble
   h1
    a(href=host)= title
   if typeof error != 'undefined'
-    div.error
-     | <strong>ERROR!</strong> #{error}
+    div.error= error
   h2
     | Download all photos you 'liked' at tumblr.
   div#buttons(style='text-align:center')
