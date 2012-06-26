@@ -129,12 +129,13 @@ sio.sockets.on('connection', function(socket) {
         socket.emit('status', 'Determining photos to download...');
         socket.emit('progress', 0);
 
-        var loops = Math.ceil(num_likes/20);
+        var step = Math.min(num_likes, 20);
+        var loops = Math.ceil(num_likes/step);
         var cnt = 0;
         var all_liked_posts = [];
         var cb = function(liked_posts, old_offset) {
             cnt++;
-            all_liked_posts[old_offset/20] = liked_posts;
+            all_liked_posts[old_offset/step] = liked_posts;
             socket.emit('progress', (cnt/loops)*100);
             if (old_offset === 0)
                 socket.emit('set last', liked_posts[0].id);
@@ -161,16 +162,16 @@ sio.sockets.on('connection', function(socket) {
         };
         var offset = 0;
         var oAuthConfig = getOAuthConfig(session);
-        while (offset+20 <= num_likes) {
-            getLikes(oAuthConfig, offset, cb);
-            offset += 20;
+        while (offset+step <= num_likes) {
+            getLikes(oAuthConfig, offset, step, cb);
+            offset += step;
         }
     });
 });
 
-function getLikes(oAuthConfig, offset, cb) {
+function getLikes(oAuthConfig, offset, step, cb) {
     app.logger.log("getting user likes for offset %d", offset);
-    new Tumblr(oAuthConfig).getUserLikes({limit: 20, offset: offset}, function(err, res) {
+    new Tumblr(oAuthConfig).getUserLikes({limit: step, offset: offset}, function(err, res) {
         app.logger.log("got likes with offset "+offset);
         //app.logger.log(util.inspect(res, false, null, true));
         if (err) {
