@@ -9,12 +9,13 @@ util = require('util'),
 everyauth = require('everyauth'),
 io = require('socket.io'),
 Tumblr = require('tumblr2'),
-parseCookie = require('connect').utils.parseCookie;
+parseCookie = require('./node_modules/express/node_modules/connect/lib/utils').parseCookie;
 
 // Session store
 var RedisStore = require('connect-redis')(express);
 var sessionStore = new RedisStore();
 
+// setup everyauth - needs to be done before configuring app
 everyauth.tumblr
     .consumerKey(config.consumerKey)
     .consumerSecret(config.consumerSecret)
@@ -31,6 +32,15 @@ everyauth.tumblr
 
 var app = module.exports = express.createServer();
 // Configuration
+
+var Logger = function(active) {
+    this.active = active;
+    this.log = function() {
+        if (this.active) {
+            console.log.apply(this, arguments);
+        }
+    };
+};
 
 app.configure(function(){
     app.set('views', __dirname + '/views');
@@ -52,10 +62,12 @@ app.configure(function(){
 
 app.configure('development', function(){
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+    app.logger = new Logger(false);
 });
 
 app.configure('production', function(){
     app.use(express.errorHandler());
+    app.logger = new Logger(false);
 });
 
 everyauth.helpExpress(app);
@@ -65,7 +77,7 @@ everyauth.helpExpress(app);
 app.get('/', function(req, res){
     if (req.session && req.session.auth && req.session.auth.loggedIn) {
         new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
-            console.log("got user info:\n"+util.inspect(info));
+            app.logger.log("got user info:\n"+util.inspect(info));
             req.session.likes = info.user.likes;
             res.render('home', { title: 'tumblikes',
                                  info: info,
@@ -79,10 +91,11 @@ app.get('/', function(req, res){
 });
 
 app.listen(config.port, function(){
-    console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+    app.logger.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
 
 var sio = io.listen(app);
+sio.set('log level', 1);
 sio.set('authorization', function(data, accept) {
     if (data.headers.cookie) {
         data.cookie = parseCookie(data.headers.cookie);
@@ -105,14 +118,14 @@ sio.set('authorization', function(data, accept) {
 
 sio.sockets.on('connection', function(socket) {
     var session = socket.handshake.session;
-    console.log('got handshake:\n'+util.inspect(session, false, null, true));
+    app.logger.log('got handshake:\n'+util.inspect(session, false, null, true));
 
     socket.on('get_likes', function(data) {
-        console.log('getting likes for '+session.auth.tumblr.user.name);
-        console.log(session.likes);
+        app.logger.log('getting likes for '+session.auth.tumblr.user.name);
+        app.logger.log(session.likes);
 
         var num_likes = Math.min(session.likes, config.likes_limit);
-        console.log("getting "+num_likes+" likes");
+        app.logger.log("getting "+num_likes+" likes");
         socket.emit('status', 'Determining photos to download...');
         socket.emit('progress', 0);
 
@@ -138,11 +151,11 @@ sio.sockets.on('connection', function(socket) {
 
 function getPhotoUrls(oAuthConfig, offset, cb) {
     new Tumblr(oAuthConfig).getUserLikes({limit: 20, offset: offset}, function(err, res) {
-        console.log("got likes with offset "+offset);
+        app.logger.log("got likes with offset "+offset);
 
         var urls = [];
         if (err) {
-            console.log("error: "+err);
+            app.logger.log("error: "+err);
             return cb(urls);
         }
 
@@ -164,28 +177,28 @@ var http = require('http');
 var fs = require('fs');
 function getPhotos(urls, socket) {
     var num_photos = urls.length;
-    console.log("got "+num_photos+" photo urls");
+    app.logger.log("got "+num_photos+" photo urls");
 
     socket.emit('status', 'Downloading '+num_photos+' photos...');
     socket.emit('progress', 0);
 
     var files = new FileStore(num_photos, socket);
     urls.forEach(function(url) {
-        console.log("checking url "+url);
+        app.logger.log("checking url "+url);
 
         var filename = config.cache_dir+url.substring(url.lastIndexOf('/')+1);
         if (path.existsSync(filename)) {
-            console.log("file already downloaded "+filename);
+            app.logger.log("file already downloaded "+filename);
             files.add(filename);
         } else {
-            console.log("getting file "+filename);
+            app.logger.log("getting file "+filename);
             url = Url.parse(url);
             http.get(url, function(response) {
                 var file = fs.createWriteStream(filename);
                 response.on('data', function(chunk){ file.write(chunk); });
                 response.on('end', function() {
                     file.end();
-                    console.log("wrote file "+filename);
+                    app.logger.log("wrote file "+filename);
                     files.add(filename);
                 });
                 response.on('close', function(err) {
@@ -203,7 +216,7 @@ function FileStore(num_files, socket) {
 
     this.add = function(filename) {
         if (this.files.indexOf(filename) != -1) {
-            console.log("got a dup! "+filename);
+            app.logger.log("got a dup! "+filename);
             this.dec();
         } else {
             this.files.push(filename);
@@ -230,15 +243,15 @@ function createZIP(files, socket) {
     var sha = crypto.createHash('sha1');
     sha.update(Date.now()+session.auth.tumblr.user.name); // create hash for timestamp plus nick
     var zipfile = config.download_dir+sha.digest('hex')+'.zip';
-    console.log(zipfile);
+    app.logger.log(zipfile);
 
     var zipOpts = ['-qj', process.cwd()+'/public/'+zipfile].concat(files);
     var zip = spawn('zip', zipOpts);
     zip.stderr.on('data', function (data) {
-        console.log('stderr: ' + data);
+        app.logger.log('stderr: ' + data);
     });
     zip.on('exit', function(code) {
-        console.log('child process exited with code ' + code);
+        app.logger.log('child process exited with code ' + code);
         socket.emit('status', 'Your ZIP archive has been created sucessfully.');
         socket.emit('download', config.host+zipfile);
         socket.emit('done');
