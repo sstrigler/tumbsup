@@ -9,7 +9,6 @@
     "repository" : { "type":"git", "url":"https://github.com/sstrigler/tumblikes.git" },
     "dependencies": {
         "express": "2.5.8",
-        "connect" : "2.3.0",
         "jade": ">= 0.0.1",
         "everyauth": ">=0.2.32",
         "tumblr2": ">=0.1.6",
