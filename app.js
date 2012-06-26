@@ -252,7 +252,7 @@ function createZIP(files, socket) {
     });
     zip.on('exit', function(code) {
         app.logger.log('child process exited with code ' + code);
-        socket.emit('status', 'Your ZIP archive has been created sucessfully.');
+        socket.emit('status', 'Your ZIP file has been created sucessfully.');
         socket.emit('download', config.host+zipfile);
         socket.emit('done');
     });
