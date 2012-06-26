@@ -120,8 +120,8 @@ sio.sockets.on('connection', function(socket) {
     var session = socket.handshake.session;
     app.logger.log('got handshake:\n'+util.inspect(session, false, null, true));
 
-    socket.on('get_likes', function(data) {
-        app.logger.log('getting likes for '+session.auth.tumblr.user.name);
+    socket.on('get_likes', function(last) {
+        app.logger.log('getting likes for %s since %s', session.auth.tumblr.user.name, last);
         app.logger.log(session.likes);
 
         var num_likes = Math.min(session.likes, config.likes_limit);
@@ -131,12 +131,28 @@ sio.sockets.on('connection', function(socket) {
 
         var loops = Math.ceil(num_likes/20);
         var cnt = 0;
-        var all_urls = [];
-        var cb = function(urls) {
+        var all_liked_posts = [];
+        var cb = function(liked_posts, old_offset) {
             cnt++;
-            all_urls = all_urls.concat(urls);
+            all_liked_posts[old_offset/20] = liked_posts;
             socket.emit('progress', (cnt/loops)*100);
+            if (old_offset === 0)
+                socket.emit('set last', liked_posts[0].id);
+
             if (cnt == loops) {
+                var stopped = false;
+                var all_urls = all_liked_posts.reduce(function(acc, posts) {
+                    var urls = [];
+                    posts.forEach(function(post) {
+                        if (post.id == last) stopped = true;
+                        if (!post.photos || stopped) return;
+                        post.photos.forEach(function(photo) {
+                            urls.push(photo.original_size.url);
+                        });
+                    });
+                    return urls;
+                }, []);
+                app.logger.log("all urls: %s", util.inspect(all_urls));
                 getPhotos(all_urls, socket);
             }
         };
@@ -150,24 +166,24 @@ sio.sockets.on('connection', function(socket) {
 });
 
 function getPhotoUrls(oAuthConfig, offset, cb) {
+    app.logger.log("offset %d", offset);
     new Tumblr(oAuthConfig).getUserLikes({limit: 20, offset: offset}, function(err, res) {
         app.logger.log("got likes with offset "+offset);
-
-        var urls = [];
+        app.logger.log(util.inspect(res, false, null, true));
         if (err) {
             app.logger.log("error: "+err);
-            return cb(urls);
+            return cb([], offset);
         }
 
-        res.liked_posts.forEach(function(like) {
-            if (like.photos) {
-                like.photos.forEach(function(photo) {
-                    urls.push(photo.original_size.url);
-                });
-            }
-        });
+        // res.liked_posts.forEach(function(like) {
+        //     if (like.photos) {
+        //         like.photos.forEach(function(photo) {
+        //             urls.push(photo.original_size.url);
+        //         });
+        //     }
+        // });
 
-        cb(urls);
+        cb(res.liked_posts, offset);
     });
 }
 
@@ -179,6 +195,11 @@ function getPhotos(urls, socket) {
     var num_photos = urls.length;
     app.logger.log("got "+num_photos+" photo urls");
 
+    if (num_photos === 0) {
+        socket.emit('status', 'Sorry, there are no photos to download.');
+        socket.emit('progress', 0);
+        return;
+    }
     socket.emit('status', 'Downloading '+num_photos+' photos...');
     socket.emit('progress', 0);
 

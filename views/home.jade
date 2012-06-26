@@ -1,3 +1,4 @@
+script(src='/javascripts/jquery.cookie.js')
 script(src='/socket.io/socket.io.js')
 script
   (function() {
@@ -12,18 +13,25 @@ script
   $(document).ready(function() {
       $('#progressbar').progressbar({value: 0});
       $('button#download').hide();
+      if (!$.cookie('last'))
+        $('#newonly_wrap').hide();
   });
   function getLikes(button) {
     $(button).hide();
+    $('#newonly_wrap').hide();
+    var last = $('#newonly').is(':checked')?$.cookie('last'):null;
     $('#status').html("Initializing...");
     var num_photos = photos_received = 0;
     $('#progressbar').progressbar("option", "value", 0);
-    socket.emit('get_likes');
+    socket.emit('get_likes', last);
     socket.on('progress', function(progress) {
       $('#progressbar').progressbar("option", "value", progress);
     });
     socket.on('status', function(status) {
       $('#status').html(status);
+    });
+    socket.on('set last', function(last) {
+      $.cookie('last', last, {expires:365});
     });
     socket.on('download', function(download) {
       $('button#download').click(function() {
@@ -58,6 +66,9 @@ div#bubble
   div#progressbar.sized
   div#status.text.strong
     | &nbsp;
+  div#newonly_wrap.note
+    input#newonly(type='checkbox')
+    label(for='newonly', title='Download photos only that are new since you last downloaded')  Download new photos only
   div#buttons
     button#download.chrome.green(style='float:right')
       div.chrome_button
