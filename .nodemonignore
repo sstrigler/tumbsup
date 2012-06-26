@@ -2,5 +2,6 @@
 /public/*
 /views/*
 .git/*
+*flymake.js
 README.md
 LICENSE
