@@ -144,13 +144,16 @@ sio.sockets.on('connection', function(socket) {
                 var all_urls = all_liked_posts.reduce(function(acc, posts) {
                     var urls = [];
                     posts.forEach(function(post) {
-                        if (post.id == last) stopped = true;
+                        if (post.id == last) {
+                            app.logger.log("collecting urls stopped at %d for %d with %d", old_offset, post.id, last);
+                            stopped = true;
+                        }
                         if (!post.photos || stopped) return;
                         post.photos.forEach(function(photo) {
                             urls.push(photo.original_size.url);
                         });
                     });
-                    return urls;
+                    return acc.concat(urls);
                 }, []);
                 app.logger.log("all urls: %s", util.inspect(all_urls));
                 getPhotos(all_urls, socket);
@@ -159,29 +162,21 @@ sio.sockets.on('connection', function(socket) {
         var offset = 0;
         var oAuthConfig = getOAuthConfig(session);
         while (offset+20 <= num_likes) {
-            getPhotoUrls(oAuthConfig, offset, cb);
+            getLikes(oAuthConfig, offset, cb);
             offset += 20;
         }
     });
 });
 
-function getPhotoUrls(oAuthConfig, offset, cb) {
-    app.logger.log("offset %d", offset);
+function getLikes(oAuthConfig, offset, cb) {
+    app.logger.log("getting user likes for offset %d", offset);
     new Tumblr(oAuthConfig).getUserLikes({limit: 20, offset: offset}, function(err, res) {
         app.logger.log("got likes with offset "+offset);
-        app.logger.log(util.inspect(res, false, null, true));
+        //app.logger.log(util.inspect(res, false, null, true));
         if (err) {
             app.logger.log("error: "+err);
             return cb([], offset);
         }
-
-        // res.liked_posts.forEach(function(like) {
-        //     if (like.photos) {
-        //         like.photos.forEach(function(photo) {
-        //             urls.push(photo.original_size.url);
-        //         });
-        //     }
-        // });
 
         cb(res.liked_posts, offset);
     });
