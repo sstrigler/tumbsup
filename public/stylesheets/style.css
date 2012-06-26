@@ -25,3 +25,15 @@ strong, .strong {
 .error, .error strong {
     color:#bf2f2f !important;
 }
+
+#menu {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 1em 1em;
+    list-style-type: none;
+}
+
+#menu a {
+    color: white;
+}
