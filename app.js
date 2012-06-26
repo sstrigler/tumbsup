@@ -79,14 +79,14 @@ app.get('/', function(req, res){
         new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
             app.logger.log("got user info:\n"+util.inspect(info));
             req.session.likes = info.user.likes;
-            res.render('home', { title: 'tumblikes',
+            res.render('home', { title: 'Tumblikes',
                                  info: info,
                                  host: config.host,
                                  limit: config.likes_limit,
                                  avatar: req.session.auth.tumblr.user['avatar-url']});
         });
     } else {
-        res.render('login', { title: 'tumblikes', host: config.host });
+        res.render('login', { title: 'Tumblikes', host: config.host });
     }
 });
 
