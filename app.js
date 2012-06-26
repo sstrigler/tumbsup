@@ -23,9 +23,9 @@ everyauth.tumblr
         return true;
     })
     .handleAuthCallbackError( function (req, res) {
-        res.render('login', { title: 'tumblikes',
+        res.render('login', { title: 'Tumblikes',
                               host: config.host,
-                              error: 'You need to authorize tumblikes in order to make this work, sorry!'
+                              error: 'You need to authorize Tumblikes in order to make this work, sorry!'
                             });
     })
     .redirectPath('/');
