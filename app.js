@@ -62,7 +62,7 @@ app.configure(function(){
 
 app.configure('development', function(){
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-    app.logger = new Logger(false);
+    app.logger = new Logger(true);
 });
 
 app.configure('production', function(){
@@ -239,19 +239,26 @@ function createZIP(files, socket) {
     var session = socket.handshake.session;
 
     // zip the file
-    socket.emit('status', 'Creating ZIP file (this may take some time)...');
+    socket.emit('status', 'Creating ZIP file...');
     var sha = crypto.createHash('sha1');
     sha.update(Date.now()+session.auth.tumblr.user.name); // create hash for timestamp plus nick
     var zipfile = config.download_dir+sha.digest('hex')+'.zip';
     app.logger.log(zipfile);
 
-    var zipOpts = ['-qj', process.cwd()+'/public/'+zipfile].concat(files);
+    var zipOpts = ['-dcj', process.cwd()+'/public/'+zipfile].concat(files);
     var zip = spawn('zip', zipOpts);
-    zip.stderr.on('data', function (data) {
+    zip.stderr.on('data', function(data) {
         app.logger.log('stderr: ' + data);
+    });
+    socket.emit('progress', 0);
+    zip.stdout.on('data', function(data) {
+        if (data.toString().match(/(.+)\//)) {
+            socket.emit('progress', (RegExp.$1/files.length)*100);
+        }
     });
     zip.on('exit', function(code) {
         app.logger.log('child process exited with code ' + code);
+        socket.emit('progress', 100);
         socket.emit('status', 'Your ZIP file has been created sucessfully.');
         socket.emit('download', config.host+zipfile);
         socket.emit('done');
