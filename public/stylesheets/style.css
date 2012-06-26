@@ -27,13 +27,17 @@ strong, .strong {
 }
 
 #menu {
-    position: absolute;
-    right: 0;
-    top: 0;
-    margin: 1em 1em;
+    float:right;
     list-style-type: none;
+    -webkit-margin-before: 0px;
+    -webkit-margin-after: 0px;
+    -webkit-padding-start: 0;
 }
 
 #menu a {
-    color: white;
+    color: #36506a;
+}
+
+#menu a:hover {
+    color: #676e74;
 }
