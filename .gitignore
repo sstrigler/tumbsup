@@ -4,7 +4,6 @@ node_modules/express/
 node_modules/jade/
 node_modules/socket.io/
 node_modules/tumblr2/
-node_modules/zipper/
 public/downloads/*
 cache/
 config.js

@@ -235,8 +235,6 @@ function FileStore(num_files, socket) {
 
 var spawn = require('child_process').spawn;
 var crypto = require('crypto');
-var Zipper = require('zipper').Zipper;
-var path = require('path');
 function createZIP(files, socket) {
     var session = socket.handshake.session;
 
@@ -244,26 +242,26 @@ function createZIP(files, socket) {
     socket.emit('status', 'Creating ZIP file...');
     var sha = crypto.createHash('sha1');
     sha.update(Date.now()+session.auth.tumblr.user.name); // create hash for timestamp plus nick
-    var zipfilename = config.download_dir+sha.digest('hex')+'.zip';
-    app.logger.log("creating zipfile %s", __dirname+'/'+zipfilename);
+    var zipfile = config.download_dir+sha.digest('hex')+'.zip';
+    app.logger.log(zipfile);
 
-    var zipfile = new Zipper(__dirname+'/public/'+zipfilename);
-    addZIP(files, 0, zipfile, zipfilename, socket);
-}
-
-function addZIP(files, pos, zipfile, zipfilename, socket) {
-    var file = files[pos];
-    zipfile.addFile(__dirname+'/'+file, path.basename(file), function(err) {
-        app.logger.log("[%d] %s", pos, file);
-        if (err) console.error(err);
-        socket.emit('progress', (pos/(files.length-1))*100);
-        if (pos==files.length-1) {
-            socket.emit('status', 'Your ZIP file has been created sucessfully.');
-            socket.emit('download', config.host+zipfilename);
-            socket.emit('done');
-        } else {
-            addZIP(files, pos+1, zipfile, zipfilename, socket);
+    var zipOpts = ['-dcj', process.cwd()+'/public/'+zipfile].concat(files);
+    var zip = spawn('zip', zipOpts);
+    zip.stderr.on('data', function(data) {
+        app.logger.log('stderr: ' + data);
+    });
+    socket.emit('progress', 0);
+    zip.stdout.on('data', function(data) {
+        if (data.toString().match(/(.+)\//)) {
+            socket.emit('progress', (RegExp.$1/files.length)*100);
         }
+    });
+    zip.on('exit', function(code) {
+        app.logger.log('child process exited with code ' + code);
+        socket.emit('progress', 100);
+        socket.emit('status', 'Your ZIP file has been created sucessfully.');
+        socket.emit('download', config.host+zipfile);
+        socket.emit('done');
     });
 }
 
