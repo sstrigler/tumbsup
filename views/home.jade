@@ -15,19 +15,17 @@ script
   });
   function getLikes(button) {
     $(button).hide();
+    $('#status').html("Initializing...");
     var num_photos = photos_received = 0;
     $('#progressbar').progressbar("option", "value", 0);
     socket.emit('get_likes');
     socket.on('progress', function(progress) {
-      console.log(progress);
       $('#progressbar').progressbar("option", "value", progress);
     });
     socket.on('status', function(status) {
-      console.log(status);
       $('#status').html(status);
     });
     socket.on('download', function(download) {
-      console.log(download);
       $('button#download').click(function() {
         document.location.href = download;
       }).show();
@@ -36,7 +34,6 @@ script
       socket.removeAllListeners('progress');
       socket.removeAllListeners('status');
     }); 
-
     return false;
   }
   function logout() {
