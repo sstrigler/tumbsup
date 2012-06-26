@@ -239,7 +239,7 @@ function createZIP(files, socket) {
     var session = socket.handshake.session;
 
     // zip the file
-    socket.emit('status', 'Creating ZIP file...');
+    socket.emit('status', 'Creating ZIP file (this may take some time)...');
     var sha = crypto.createHash('sha1');
     sha.update(Date.now()+session.auth.tumblr.user.name); // create hash for timestamp plus nick
     var zipfile = config.download_dir+sha.digest('hex')+'.zip';
