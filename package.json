@@ -4,7 +4,7 @@
     "author": { "name": "Stefan Strigler",
                 "email": "stefan@strigler.de"
               },
-    "version": "0.9.0",
+    "version": "1.0.0",
     "keywords": ["tumblr", "client", "user", "likes", "backup", "download"],
     "repository" : { "type":"git", "url":"https://github.com/sstrigler/tumblikes.git" },
     "dependencies": {
