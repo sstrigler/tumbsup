@@ -16,10 +16,24 @@ http://www.tumblr.com/oauth/apps and register an application.
 Installation and Running
 ---------------------
 
-    $ git clone
+    $ git clone https://github.com/sstrigler/tumblikes.git
+    $ cd tumblikes
     $ npm install
     $ cp config.js.example config.js
     $ vi config.js
     $ NODE_ENV=production node app.js
 
 Then point your browser to the location configured at config.js and enjoy!
+
+Copyright & Authors
+------------------
+
+(c) 2012 Stefan Strigler <stefan@strigler.de>
+
+License
+------
+
+Tumblikes is licensed unter the GNU AFFERO GENERAL PUBLIC LICENSE as
+of version 3. For details please have a look at the file COPYING that
+should have been distributed with this software.
+
