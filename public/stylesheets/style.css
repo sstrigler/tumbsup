@@ -7,7 +7,7 @@ h2 {
 }
 
 .text {
-    font-size:20px;
+    font-size:1em;
     color:#85898c;
     margin:20px 0;
 }
@@ -20,6 +20,7 @@ h2 {
 
 strong, .strong {
     color:#676e74;
+    font-weight:bold;
 }
 
 .error, .error strong {
