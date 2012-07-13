@@ -12,14 +12,18 @@ script
   var socket = io.connect('#{host}');
   $(document).ready(function() {
       $('#progressbar').progressbar({value: 0});
+      $('#progressbar').hide();
+      $('#status').hide();
       $('button#download').hide();
       if (!$.cookie('last'))
         $('#newonly_wrap').hide();
   });
   function getLikes(button) {
     $(button).hide();
+    $('#progressbar').show();
     $('#newonly_wrap').hide();
     var last = $('#newonly').is(':checked')?$.cookie('last'):null;
+    $('#status').show();
     $('#status').html("Initializing...");
     var num_photos = photos_received = 0;
     $('#progressbar').progressbar("option", "value", 0);
