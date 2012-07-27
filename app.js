@@ -220,7 +220,8 @@ function getPhotos(urls, socket) {
                 });
                 response.on('close', function(err) {
                     console.error(err);
-                    files.dec();
+                    if (!files.has(filename))
+                        files.dec();
                 });
             });
         }
