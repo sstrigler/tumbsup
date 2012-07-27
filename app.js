@@ -213,7 +213,7 @@ function getPhotos(urls, socket) {
             http.get(url, function(response) {
                 var file = fs.createWriteStream(filename);
                 response.on('data', function(chunk){ file.write(chunk); });
-                response.on('end', function() {
+                response.on('end', function(foo) {
                     file.end();
                     app.logger.log("wrote file "+filename);
                     files.add(filename);
@@ -228,25 +228,28 @@ function getPhotos(urls, socket) {
 }
 
 function FileStore(num_files, socket) {
-    this.files = [];
-    this.num_files = num_files;
+    var files = [];
+
+    this.has = function(filename) {
+        return files.indexOf(filename) != -1;
+    };
 
     this.add = function(filename) {
-        if (this.files.indexOf(filename) != -1) {
+        if (this.has(filename)) {
             app.logger.log("got a dup! "+filename);
             this.dec();
         } else {
-            this.files.push(filename);
+            files.push(filename);
         }
-        socket.emit('progress', (this.files.length/this.num_files)*100);
-        if (this.files.length == this.num_files) {
+        socket.emit('progress', (files.length/num_files)*100);
+        if (files.length == num_files) {
             // we're done downloading
-            createZIP(this.files, socket);
+            createZIP(files, socket);
         }
     };
 
     this.dec = function() {
-        this.num_files--;
+        num_files--;
     };
 }
 
