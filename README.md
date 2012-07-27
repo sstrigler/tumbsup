@@ -8,7 +8,7 @@ Tumblr as a ZIP file. Tumblikes is based on node.js.
 Prerequisites
 -----------
 
-Node as of Version 0.8.x.
+Node as of version 0.8.x.
 Tumblr oAuth API credentials. To get them got to http://tumblr.com and
 create an account if you don't happen to have one. Then go to
 http://www.tumblr.com/oauth/apps and register an application.
