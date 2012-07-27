@@ -183,7 +183,6 @@ function getLikes(oAuthConfig, offset, step, cb) {
     });
 }
 
-var path = require('path');
 var Url = require('url');
 var http = require('http');
 var fs = require('fs');
@@ -204,7 +203,7 @@ function getPhotos(urls, socket) {
         app.logger.log("checking url "+url);
 
         var filename = config.cache_dir+url.substring(url.lastIndexOf('/')+1);
-        if (path.existsSync(filename)) {
+        if (fs.existsSync(filename)) {
             app.logger.log("file already downloaded "+filename);
             files.add(filename);
         } else {
