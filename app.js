@@ -34,11 +34,37 @@ var app = module.exports = express.createServer();
 // Configuration
 
 var Logger = function(active) {
-    this.active = active;
     this.log = function() {
-        if (this.active) {
+        if (active) {
             console.log.apply(this, arguments);
         }
+    };
+};
+
+// sets remote progress via socket
+var Progressbar = function(socket, steps) {
+
+    this.init = function() {
+        this.step = 0;
+        socket.emit('progress', 0);
+        socket.emit('status', '');
+        return this;
+    };
+
+    this.status = function(status) {
+        socket.emit('status', status);
+        return this;
+    };
+
+    this.next_step =  function() {
+        this.step++;
+        socket.emit('progress', (this.step/steps) * 100);
+        return this;
+    };
+
+    this.progress = function(val) {
+        socket.emit('progress', ((this.step/steps) * 100) + (1/steps) * val * 100);
+        return this;
     };
 };
 
@@ -120,14 +146,19 @@ sio.sockets.on('connection', function(socket) {
     var session = socket.handshake.session;
     app.logger.log('got handshake:\n'+util.inspect(session, false, null, true));
 
+    // we've got three steps to take: 
+    // * determining photos to download
+    // * download photos
+    // * create zip file
+    var progressbar = new Progressbar(socket, 3);
+
     socket.on('get_likes', function(last) {
         app.logger.log('getting likes for %s since %s', session.auth.tumblr.user.name, last);
         app.logger.log(session.likes);
 
         var num_likes = Math.min(session.likes, config.likes_limit);
         app.logger.log("getting "+num_likes+" likes");
-        socket.emit('status', 'Determining photos to download...');
-        socket.emit('progress', 0);
+        progressbar.init().status('Determining photos to download...');
 
         var step = Math.min(num_likes, 20);
         var loops = Math.ceil(num_likes/step);
@@ -136,7 +167,7 @@ sio.sockets.on('connection', function(socket) {
         var cb = function(liked_posts, old_offset) {
             cnt++;
             all_liked_posts[old_offset/step] = liked_posts;
-            socket.emit('progress', (cnt/loops)*100);
+            progressbar.progress(cnt/loops);
             if (old_offset === 0)
                 socket.emit('set last', liked_posts[0].id);
 
@@ -157,7 +188,7 @@ sio.sockets.on('connection', function(socket) {
                     return acc.concat(urls);
                 }, []);
                 app.logger.log("all urls: %s", util.inspect(all_urls));
-                getPhotos(all_urls, socket);
+                getPhotos(all_urls, socket, progressbar);
             }
         };
         var offset = 0;
@@ -186,19 +217,17 @@ function getLikes(oAuthConfig, offset, step, cb) {
 var Url = require('url');
 var http = require('http');
 var fs = require('fs');
-function getPhotos(urls, socket) {
+function getPhotos(urls, socket, progressbar) {
     var num_photos = urls.length;
     app.logger.log("got "+num_photos+" photo urls");
 
     if (num_photos === 0) {
-        socket.emit('status', 'Sorry, there are no photos to download.');
-        socket.emit('progress', 0);
+        progressbar.init().status('Sorry, there are no photos to download.');
         return;
     }
-    socket.emit('status', 'Downloading '+num_photos+' photos...');
-    socket.emit('progress', 0);
+    progressbar.next_step().status('Downloading '+num_photos+' photos...');
 
-    var files = new FileStore(num_photos, socket);
+    var files = new FileStore(num_photos, socket, progressbar);
     urls.forEach(function(url) {
         app.logger.log("checking url "+url);
 
@@ -227,7 +256,7 @@ function getPhotos(urls, socket) {
     });
 }
 
-function FileStore(num_files, socket) {
+function FileStore(num_files, socket, progressbar) {
     var files = [];
 
     this.has = function(filename) {
@@ -241,10 +270,10 @@ function FileStore(num_files, socket) {
         } else {
             files.push(filename);
         }
-        socket.emit('progress', (files.length/num_files)*100);
+        progressbar.progress(files.length/num_files);
         if (files.length == num_files) {
             // we're done downloading
-            createZIP(files, socket);
+            createZIP(files, socket, progressbar);
         }
     };
 
@@ -255,11 +284,11 @@ function FileStore(num_files, socket) {
 
 var spawn = require('child_process').spawn;
 var crypto = require('crypto');
-function createZIP(files, socket) {
+function createZIP(files, socket, progressbar) {
     var session = socket.handshake.session;
 
     // zip the file
-    socket.emit('status', 'Creating ZIP file...');
+    progressbar.next_step().status('Creating ZIP file...');
     var sha = crypto.createHash('sha1');
     sha.update(Date.now()+session.auth.tumblr.user.name); // create hash for timestamp plus nick
     var zipfile = config.download_dir+sha.digest('hex')+'.zip';
@@ -270,16 +299,14 @@ function createZIP(files, socket) {
     zip.stderr.on('data', function(data) {
         app.logger.log('stderr: ' + data);
     });
-    socket.emit('progress', 0);
     zip.stdout.on('data', function(data) {
         if (data.toString().match(/(.+)\//)) {
-            socket.emit('progress', (RegExp.$1/files.length)*100);
+            progressbar.progress(RegExp.$1/files.length);
         }
     });
     zip.on('exit', function(code) {
         app.logger.log('child process exited with code ' + code);
-        socket.emit('progress', 100);
-        socket.emit('status', 'Your ZIP file has been created sucessfully.');
+        progressbar.progress(1).status('Your ZIP file has been created sucessfully.');
         socket.emit('download', config.host+zipfile);
         socket.emit('done');
     });
