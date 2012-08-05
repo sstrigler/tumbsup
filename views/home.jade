@@ -13,7 +13,6 @@ script
   $(document).ready(function() {
       $('#progressbar').progressbar({value: 0});
       $('#progressbar').hide();
-      $('#status').hide();
       $('button#download').hide();
       if (!$.cookie('last'))
         $('#newonly_wrap').hide();
@@ -23,8 +22,6 @@ script
     $('#progressbar').show();
     $('#newonly_wrap').hide();
     var last = $('#newonly').is(':checked')?$.cookie('last'):null;
-    $('#status').show();
-    $('#status').html("Initializing...");
     var num_photos = photos_received = 0;
     $('#progressbar').progressbar("option", "value", 0);
     socket.emit('get_likes', last);
@@ -32,7 +29,7 @@ script
       $('#progressbar').progressbar("option", "value", progress);
     });
     socket.on('status', function(status) {
-      $('#status').html(status);
+      $('#progressbar').attr('title', status);
     });
     socket.on('set last', function(last) {
       $.cookie('last', last, {expires:365});
@@ -67,9 +64,7 @@ div#bubble
     if info.user.likes > limit
       p 
         | <strong>There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!</strong>
-  div#progressbar.sized
-  div#status.text.strong
-    | &nbsp;
+  div#progressbar
   div#newonly_wrap.note
     input#newonly(type='checkbox')
     label(for='newonly', title='Download photos only that are new since you last downloaded')  Download new photos only

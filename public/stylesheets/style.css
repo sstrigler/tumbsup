@@ -42,3 +42,7 @@ strong, .strong {
 #menu a:hover {
     color: #676e74;
 }
+
+#progressbar {
+    margin-bottom: 20px; 
+}
