@@ -11,16 +11,14 @@ div#bubble
   if typeof error != 'undefined'
     div.error= error
   h2
-    | Download all photos you 'liked' at Tumblr.
-  ol.note
-    li Authorize us at Tumblr.
-    li Start process.
-    li Download your stuff!
+    | Get your <em>likes</em> in 3 simple steps:
+  ol#instructions.note
+    li <strong>Authorize</strong> us
+    li <strong>Start</strong> process
+    li <strong>Download</strong> your archive!
   div#buttons(style='text-align:center')
     button#download.chrome.green(onclick='return login();')
       div.chrome_button
         div.chrome_button_left
         | Get started
         div.chrome_button_right
-  div.note.strong
-    | P.S.: Use at your own risk!

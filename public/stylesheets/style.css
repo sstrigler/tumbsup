@@ -46,3 +46,14 @@ strong, .strong {
 #progressbar {
     margin-bottom: 20px; 
 }
+
+ol#instructions {
+    list-style-type: none;
+    padding: 0;
+}
+
+ol#instructions li { 
+    display: inline;
+    padding: 0 4px;
+}
+ol#instructions li + li:before { content: '»'; position: relative; left: -4px; }  
