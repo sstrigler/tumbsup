@@ -49,19 +49,19 @@ script
     document.location.href = '/logout';
   }
 div#user
-  a#user_avatar(href="#{everyauth.tumblr.user.url}",
+  a#user_avatar(href="#{blog.url}",
     target="_blank", 
-    style="background-image:url('#{avatar}')") 
-  a#user_name(href="#{everyauth.tumblr.user.url}", target="_blank")= everyauth.tumblr.user.title
-  a#user_url(href="#{everyauth.tumblr.user.url}", target="_blank")= everyauth.tumblr.user.url
+    style="background-image:url('http://api.tumblr.com/v2/blog/#{blog.name}.tumblr.com/avatar')") 
+  a#user_name(href="#{blog.url}", target="_blank")= blog.title
+  a#user_url(href="#{blog.url}", target="_blank")= blog.url
 div#bubble
   div#nipple
   ul#menu
     li
      a(href='http://baemalaem.tumblr.com/ask', title='Help/Questions', target='_blank') ?
   div#info.text
-    | You've got <strong>#{info.user.likes}</strong> likes.
-    if info.user.likes > limit
+    | You've got <strong>#{everyauth.tumblr.user.likes}</strong> likes.
+    if everyauth.tumblr.user.likes > limit
       p 
         | <strong>There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!</strong>
   div#progressbar

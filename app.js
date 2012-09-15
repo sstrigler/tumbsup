@@ -102,15 +102,12 @@ everyauth.helpExpress(app);
 
 app.get('/', function(req, res){
     if (req.session && req.session.auth && req.session.auth.loggedIn) {
-        new Tumblr(getOAuthConfig(req.session)).getUserInfo(function(err, info) {
-            app.logger.log("got user info:\n"+util.inspect(info));
-            req.session.likes = info.user.likes;
-            res.render('main', { title: 'Tumblikes',
-                                 info: info,
-                                 host: config.host,
-                                 limit: config.likes_limit,
-                                 avatar: req.session.auth.tumblr.user['avatar-url']});
-        });
+        app.logger.log("got auth:" + util.inspect(req.session.auth));
+
+        res.render('main', { title: 'Tumblikes',
+                             host: config.host,
+                             blog: req.session.auth.tumblr.user.blogs[0],
+                             limit: config.likes_limit});
     } else {
         res.render('start', { title: 'Tumblikes', host: config.host });
     }
@@ -154,9 +151,9 @@ sio.sockets.on('connection', function(socket) {
 
     socket.on('get_likes', function(last) {
         app.logger.log('getting likes for %s since %s', session.auth.tumblr.user.name, last);
-        app.logger.log(session.likes);
+        app.logger.log(session.auth.tumblr.user.likes);
 
-        var num_likes = Math.min(session.likes, config.likes_limit);
+        var num_likes = Math.min(session.auth.tumblr.user.likes, config.likes_limit);
         app.logger.log("getting "+num_likes+" likes");
         progressbar.init().status('Determining photos to download...');
 
