@@ -155,7 +155,7 @@ sio.sockets.on('connection', function(socket) {
 
         var num_likes = Math.min(session.auth.tumblr.user.likes, config.likes_limit);
         app.logger.log("getting "+num_likes+" likes");
-        progressbar.init().status('Determining photos to download...');
+        progressbar.init().status('Determining posts to download...');
 
         var step = Math.min(num_likes, 20);
         var loops = Math.ceil(num_likes/step);
@@ -179,9 +179,10 @@ sio.sockets.on('connection', function(socket) {
                             return;
                         }
                         app.logger.log(util.inspect(post, false, null, true));
-                        if (post.type == 'video')
-                            urls.push(post.video_url);
-                        else if (post.type == 'photo' && typeof post.photos !== 'undefined') {
+                        if (post.type == 'video') {
+                            if (post.video_url)
+                                urls.push(post.video_url);
+                        } else if (post.type == 'photo' && post.photos) {
                             post.photos.forEach(function(photo) {
                                 urls.push(photo.original_size.url);
                             });
@@ -221,13 +222,13 @@ var http = require('http');
 var fs = require('fs');
 function getPhotos(urls, socket, progressbar) {
     var num_photos = urls.length;
-    app.logger.log("got "+num_photos+" photo urls");
+    app.logger.log("got "+num_photos+" urls");
 
     if (num_photos === 0) {
-        progressbar.init().status('Sorry, there are no photos to download.');
+        progressbar.init().status('Sorry, there are no posts to download.');
         return;
     }
-    progressbar.next_step().status('Downloading '+num_photos+' photos...');
+    progressbar.next_step().status('Downloading '+num_photos+' posts...');
 
     var files = new FileStore(num_photos, socket, progressbar);
     urls.forEach(function(url) {
