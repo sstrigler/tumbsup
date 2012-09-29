@@ -2,8 +2,8 @@
 Tumblikes
 ========
 
-A web based tool that allows you to download all photos you 'liked' at
-Tumblr as a ZIP file. Tumblikes is based on node.js.
+A web based tool that allows you to download all photos and videos you
+'liked' at Tumblr as a ZIP file. Tumblikes is based on node.js.
 
 Prerequisites
 -----------
