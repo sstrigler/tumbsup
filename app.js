@@ -176,8 +176,9 @@ sio.sockets.on('connection', function(socket) {
                         if (post.id == last) {
                             app.logger.log("collecting urls stopped at %d for %d with %d", old_offset, post.id, last);
                             stopped = true;
-                            return;
                         }
+                        if (stopped)
+                            return;
                         app.logger.log(util.inspect(post, false, null, true));
                         if (post.type == 'video') {
                             if (post.video_url)
