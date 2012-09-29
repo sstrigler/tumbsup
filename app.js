@@ -176,11 +176,16 @@ sio.sockets.on('connection', function(socket) {
                         if (post.id == last) {
                             app.logger.log("collecting urls stopped at %d for %d with %d", old_offset, post.id, last);
                             stopped = true;
+                            return;
                         }
-                        if (!post.photos || stopped) return;
-                        post.photos.forEach(function(photo) {
-                            urls.push(photo.original_size.url);
-                        });
+                        app.logger.log(util.inspect(post, false, null, true));
+                        if (post.type == 'video')
+                            urls.push(post.video_url);
+                        else if (post.type == 'photo' && typeof post.photos !== 'undefined') {
+                            post.photos.forEach(function(photo) {
+                                urls.push(photo.original_size.url);
+                            });
+                        }
                     });
                     return acc.concat(urls);
                 }, []);
