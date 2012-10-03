@@ -45,9 +45,6 @@ script
     }); 
     return false;
   }
-  function logout() {
-    document.location.href = '/logout';
-  }
 div#user
   a#user_avatar(href="#{blog.url}",
     target="_blank", 
@@ -68,19 +65,14 @@ div#bubble
   div#newonly_wrap.note
     input#newonly(type='checkbox')
     label(for='newonly', title='Download posts only that are new since you last downloaded')  Download new posts only
-  div#buttons
-    button#download.chrome.green(style='float:right')
+  div#buttons(style='text-align:center')
+    button#download.chrome.green
       div.chrome_button
         div.chrome_button_left
         | Download ZIP file
         div.chrome_button_right
-    button.chrome.green(onclick='return getLikes(this)', style='float:right')
+    button.chrome.green(onclick='return getLikes(this)')
       div.chrome_button
         div.chrome_button_left
         | Get'em all!
-        div.chrome_button_right
-    button.chrome(onclick='return logout();')
-      div.chrome_button
-        div.chrome_button_left
-        | Logout
         div.chrome_button_right
