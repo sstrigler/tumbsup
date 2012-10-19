@@ -9,3 +9,4 @@ cache/
 config.js
 *.log
 *flymake.js
+dump.rdb
