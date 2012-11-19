@@ -109,7 +109,7 @@ app.get('/', function(req, res){
                              blog: req.session.auth.tumblr.user.blogs[0],
                              limit: config.likes_limit});
     } else {
-        res.render('start', { title: 'Tumblikes', host: config.host });
+        res.render('login', { title: 'Tumblikes', host: config.host });
     }
 });
 
