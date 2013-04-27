@@ -1,12 +1,12 @@
 {
-    "name": "tumblikes",
-    "description": "let's you download all your likes at tumblr",
+    "name": "tumbsup",
+    "description": "let's you backup your stuff at tumblr",
     "author": { "name": "Stefan Strigler",
                 "email": "stefan@strigler.de"
               },
     "version": "1.0.0",
-    "keywords": ["tumblr", "client", "user", "likes", "backup", "download"],
-    "repository" : { "type":"git", "url":"https://github.com/sstrigler/tumblikes.git" },
+    "keywords": ["tumblr", "backup", "download", "export", "import"],
+    "repository" : { "type":"git", "url":"https://github.com/sstrigler/tumbsup.git" },
     "dependencies": {
         "express": "2.5.8",
         "jade": ">= 0.0.1",

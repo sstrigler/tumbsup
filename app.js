@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -23,9 +22,9 @@ everyauth.tumblr
         return true;
     })
     .handleAuthCallbackError( function (req, res) {
-        res.render('login', { title: 'Tumblikes',
+        res.render('login', { title: 'Tumbsup',
                               host: config.host,
-                              error: 'You need to authorize Tumblikes in order to make this work, sorry!'
+                              error: 'You need to authorize Tumbsup in order to make this work, sorry!'
                             });
     })
     .redirectPath('/');
@@ -76,7 +75,7 @@ app.configure(function(){
     app.use(express.bodyParser());
     app.use(express.cookieParser());
     app.use(express.session({
-		'store': sessionStore,
+        'store': sessionStore,
         'secret': config.session_secret,
         'key': 'express.sid'
     }));
@@ -104,12 +103,12 @@ app.get('/', function(req, res){
     if (req.session && req.session.auth && req.session.auth.loggedIn) {
         app.logger.log("got auth:" + util.inspect(req.session.auth));
 
-        res.render('main', { title: 'Tumblikes',
+        res.render('main', { title: 'Tumbsup',
                              host: config.host,
                              blog: req.session.auth.tumblr.user.blogs[0],
                              limit: config.likes_limit});
     } else {
-        res.render('login', { title: 'Tumblikes', host: config.host });
+        res.render('login', { title: 'Tumbsup', host: config.host });
     }
 });
 
@@ -135,7 +134,7 @@ sio.set('authorization', function(data, accept) {
             }
         });
     } else {
-       return accept('No cookie transmitted.', false);
+        return accept('No cookie transmitted.', false);
     }
 });
 
@@ -143,7 +142,7 @@ sio.sockets.on('connection', function(socket) {
     var session = socket.handshake.session;
     app.logger.log('got handshake:\n'+util.inspect(session, false, null, true));
 
-    // we've got three steps to take: 
+    // we've got three steps to take:
     // * determining photos to download
     // * download photos
     // * create zip file
@@ -320,9 +319,9 @@ function getOAuthConfig(session) {
     var t = session.auth.tumblr;
     var c = {
         consumerKey: config.consumerKey,
-            consumerSecret: config.consumerSecret,
-            accessTokenKey: t.accessToken,
-            accessTokenSecret: t.accessTokenSecret
-        };
+        consumerSecret: config.consumerSecret,
+        accessTokenKey: t.accessToken,
+        accessTokenSecret: t.accessTokenSecret
+    };
     return c;
 }
