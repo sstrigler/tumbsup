@@ -1,77 +1,77 @@
-  script(src='/javascripts/jquery.cookie.js')
-  script(src='/socket.io/socket.io.js')
-  script
-    (function() {
-        var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
-        s.type = 'text/javascript';
-        s.async = true;
-        s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
-        t.parentNode.insertBefore(s, t);
-    })();
-  script
-    var socket = io.connect('#{host}');
-    $(document).ready(function() {
-        $('#progressbar').progressbar({value: 0});
-        $('#progressbar').hide();
-        $('button#download').hide();
-        if (!$.cookie('last'))
-          $('#newonly_wrap').hide();
+script(src='/javascripts/jquery.cookie.js')
+script(src='/socket.io/socket.io.js')
+script
+  (function() {
+      var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+      t.parentNode.insertBefore(s, t);
+  })();
+script
+  var socket = io.connect('#{host}');
+  $(document).ready(function() {
+      $('#progressbar').progressbar({value: 0});
+      $('#progressbar').hide();
+      $('button#download').hide();
+      if (!$.cookie('last'))
+        $('#newonly_wrap').hide();
+  });
+  function getLikes(button) {
+    $(button).hide();
+    $('#progressbar').show();
+    $('#newonly_wrap').hide();
+    var last = $('#newonly').is(':checked')?$.cookie('last'):null;
+    var num_photos = photos_received = 0;
+    $('#progressbar').progressbar("option", "value", 0);
+    socket.emit('get_likes', last);
+    socket.on('progress', function(progress) {
+      $('#progressbar').progressbar("option", "value", progress);
     });
-    function getLikes(button) {
-      $(button).hide();
-      $('#progressbar').show();
-      $('#newonly_wrap').hide();
-      var last = $('#newonly').is(':checked')?$.cookie('last'):null;
-      var num_photos = photos_received = 0;
-      $('#progressbar').progressbar("option", "value", 0);
-      socket.emit('get_likes', last);
-      socket.on('progress', function(progress) {
-        $('#progressbar').progressbar("option", "value", progress);
-      });
-      socket.on('status', function(status) {
-        $('#progressbar').attr('title', status);
-      });
-      socket.on('set last', function(last) {
-        $.cookie('last', last, {expires:365});
-      });
-      socket.on('download', function(download) {
-        $('button#download').click(function() {
-          document.location.href = download;
-        }).show();
-      });
-      socket.on('done', function() {
-        socket.removeAllListeners('progress');
-        socket.removeAllListeners('status');
-      });
-      return false;
-    }
-  div#user
-    a#user_avatar(href="#{blog.url}",
-      target="_blank",
-      style="background-image:url('http://api.tumblr.com/v2/blog/#{blog.name}.tumblr.com/avatar')")
-    a#user_name(href="#{blog.url}", target="_blank")= blog.title
-    a#user_url(href="#{blog.url}", target="_blank")= blog.url
-  div#bubble
-    div#nipple
-    ul#menu
-      li
-       a(href='http://baemalaem.tumblr.com/ask', title='Help/Questions', target='_blank') ?
-    div#info.text
-      | You've got <strong>#{everyauth.tumblr.user.likes}</strong> likes.
-      if everyauth.tumblr.user.likes > limit
-        p
-          | <strong>There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!</strong>
-    div#progressbar
-    div#newonly_wrap.note
-      input#newonly(type='checkbox')
-      label(for='newonly', title='Download posts only that are new since you last downloaded')  Download new posts only
-    div#buttons(style='text-align:center')
-      button#download.chrome.green
-        div.chrome_button
-          div.chrome_button_left
-          | Download ZIP file
-          div.chrome_button_right
-      button.chrome.green(onclick='return getLikes(this)')
+    socket.on('status', function(status) {
+      $('#progressbar').attr('title', status);
+    });
+    socket.on('set last', function(last) {
+      $.cookie('last', last, {expires:365});
+    });
+    socket.on('download', function(download) {
+      $('button#download').click(function() {
+        document.location.href = download;
+      }).show();
+    });
+    socket.on('done', function() {
+      socket.removeAllListeners('progress');
+      socket.removeAllListeners('status');
+    }); 
+    return false;
+  }
+div#user
+  a#user_avatar(href="#{blog.url}",
+    target="_blank", 
+    style="background-image:url('http://api.tumblr.com/v2/blog/#{blog.name}.tumblr.com/avatar')") 
+  a#user_name(href="#{blog.url}", target="_blank")= blog.title
+  a#user_url(href="#{blog.url}", target="_blank")= blog.url
+div#bubble
+  div#nipple
+  ul#menu
+    li
+     a(href='http://baemalaem.tumblr.com/ask', title='Help/Questions', target='_blank') ?
+  div#info.text
+    | You've got <strong>#{everyauth.tumblr.user.likes}</strong> likes.
+    if everyauth.tumblr.user.likes > limit
+      p 
+        | <strong>There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!</strong>
+  div#progressbar
+  div#newonly_wrap.note
+    input#newonly(type='checkbox')
+    label(for='newonly', title='Download posts only that are new since you last downloaded')  Download new posts only
+  div#buttons(style='text-align:center')
+    button#download.chrome.green
+      div.chrome_button
+        div.chrome_button_left
+        | Download ZIP file
+        div.chrome_button_right
+    button.chrome.green(onclick='return getLikes(this)')
       div.chrome_button
         div.chrome_button_left
         | Get'em all!
