@@ -17,14 +17,14 @@ script
       if (!$.cookie('last'))
         $('#newonly_wrap').hide();
   });
-  function getLikes(button) {
+  function tumbsUp(button) {
     $(button).hide();
     $('#progressbar').show();
     $('#newonly_wrap').hide();
     var last = $('#newonly').is(':checked')?$.cookie('last'):null;
     var num_photos = photos_received = 0;
     $('#progressbar').progressbar("option", "value", 0);
-    socket.emit('get_likes', last);
+    socket.emit('tumbsup', last);
     socket.on('progress', function(progress) {
       $('#progressbar').progressbar("option", "value", progress);
     });
@@ -42,12 +42,12 @@ script
     socket.on('done', function() {
       socket.removeAllListeners('progress');
       socket.removeAllListeners('status');
-    }); 
+    });
     return false;
   }
 div#user
   a#user_avatar(href="#{blog.url}",
-    target="_blank", 
+    target="_blank",
     style="background-image:url('http://api.tumblr.com/v2/blog/#{blog.name}.tumblr.com/avatar')") 
   a#user_name(href="#{blog.url}", target="_blank")= blog.title
   a#user_url(href="#{blog.url}", target="_blank")= blog.url
@@ -55,11 +55,11 @@ div#bubble
   div#nipple
   ul#menu
     li
-     a(href='http://baemalaem.tumblr.com/ask', title='Help/Questions', target='_blank') ?
+     a(href='http://baemagain.tumblr.com/ask', title='Help/Questions', target='_blank') ?
   div#info.text
     | You've got <strong>#{everyauth.tumblr.user.likes}</strong> likes.
     if everyauth.tumblr.user.likes > limit
-      p 
+      p
         | <strong>There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!</strong>
   div#progressbar
   div#newonly_wrap.note
@@ -71,7 +71,7 @@ div#bubble
         div.chrome_button_left
         | Download ZIP file
         div.chrome_button_right
-    button.chrome.green(onclick='return getLikes(this)')
+    button.chrome.green(onclick='return tumbsUp(this)')
       div.chrome_button
         div.chrome_button_left
         | Get'em all!

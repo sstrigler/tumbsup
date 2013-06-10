@@ -148,11 +148,19 @@ sio.sockets.on('connection', function(socket) {
     // * create zip file
     var progressbar = new Progressbar(socket, 3);
 
-    socket.on('get_likes', function(last) {
-        app.logger.log('getting likes for %s since %s', session.auth.tumblr.user.name, last);
+    socket.on('tumbsup', function(last) {
+
+        var oAuthConfig = getOAuthConfig(session);
+
+        getUserFollowing(oAuthConfig, session.auth.tumblr.user.following);
+
+        app.logger.log('getting likes for %s since %s',
+                       session.auth.tumblr.user.name,
+                       last);
         app.logger.log(session.auth.tumblr.user.likes);
 
-        var num_likes = Math.min(session.auth.tumblr.user.likes, config.likes_limit);
+        var num_likes = Math.min(session.auth.tumblr.user.likes,
+                                 config.likes_limit);
         app.logger.log("getting "+num_likes+" likes");
         progressbar.init().status('Determining posts to download...');
 
@@ -173,7 +181,9 @@ sio.sockets.on('connection', function(socket) {
                     var urls = [];
                     posts.forEach(function(post) {
                         if (post.id == last) {
-                            app.logger.log("collecting urls stopped at %d for %d with %d", old_offset, post.id, last);
+                            app.logger.log(
+                                "collecting urls stopped at %d for %d with %d",
+                                old_offset, post.id, last);
                             stopped = true;
                         }
                         if (stopped)
@@ -195,15 +205,42 @@ sio.sockets.on('connection', function(socket) {
             }
         };
         var offset = 0;
-        var oAuthConfig = getOAuthConfig(session);
         while (offset+step <= num_likes) {
-            getLikes(oAuthConfig, offset, step, cb);
+            //getUserLikes(oAuthConfig, offset, step, cb);
             offset += step;
         }
     });
 });
 
-function getLikes(oAuthConfig, offset, step, cb) {
+function getUserFollowing(oAuthConfig, num_following) {
+    app.logger.log("getting %d followings", num_following);
+
+    var tumblr = new Tumblr(oAuthConfig);
+    var following = [];
+    var offset = 0;
+    var limit = 20;
+
+    var resultHandler = function(offset)  {
+        return function(err, res) {
+            app.logger.log(res);
+            app.logger.log(offset);
+            if (!err)
+                following = following.concat(res.blogs);
+            app.logger.log(following.length);
+            if (following.length == num_following ) {
+                app.logger.log("got %d followings", following.length);
+            }
+        };
+    };
+
+    while (offset < num_following) {
+        tumblr.getUserFollowing({limit: limit, offset: offset},
+                                resultHandler(offset));
+        offset += limit;
+    }
+}
+
+function getUserLikes(oAuthConfig, offset, step, cb) {
     app.logger.log("getting user likes for offset %d", offset);
     new Tumblr(oAuthConfig).getUserLikes({limit: step, offset: offset}, function(err, res) {
         app.logger.log("got likes with offset "+offset);
