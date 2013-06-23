@@ -18,6 +18,7 @@ var sessionStore = new RedisStore();
 everyauth.tumblr
     .consumerKey(config.consumerKey)
     .consumerSecret(config.consumerSecret)
+    .myHostname(config.host)
     .findOrCreateUser( function (sess, accessToken, accessSecret, user) {
         return true;
     })
