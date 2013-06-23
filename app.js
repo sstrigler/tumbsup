@@ -143,77 +143,87 @@ sio.sockets.on('connection', function(socket) {
     app.logger.log('got handshake:\n'+util.inspect(session, false, null, true));
 
     // we've got three steps to take:
+    // * download followings
     // * determining photos to download
     // * download photos
     // * create zip file
-    var progressbar = new Progressbar(socket, 3);
+    var progressbar = new Progressbar(socket, 4);
 
     socket.on('tumbsup', function(last) {
 
-        var oAuthConfig = getOAuthConfig(session);
+        var getLikes = function(followings_file) {
+            var oAuthConfig = getOAuthConfig(session);
 
-        getUserFollowing(oAuthConfig, session.auth.tumblr.user.following);
+            app.logger.log('getting likes for %s since %s',
+                           session.auth.tumblr.user.name,
+                           last);
+            app.logger.log(session.auth.tumblr.user.likes);
 
-        app.logger.log('getting likes for %s since %s',
-                       session.auth.tumblr.user.name,
-                       last);
-        app.logger.log(session.auth.tumblr.user.likes);
+            var num_likes = Math.min(session.auth.tumblr.user.likes,
+                                     config.likes_limit);
+            app.logger.log("getting "+num_likes+" likes");
+            progressbar.next_step().status('Determining posts to download...');
 
-        var num_likes = Math.min(session.auth.tumblr.user.likes,
-                                 config.likes_limit);
-        app.logger.log("getting "+num_likes+" likes");
-        progressbar.init().status('Determining posts to download...');
+            var step = Math.min(num_likes, 20);
+            var loops = Math.ceil(num_likes/step);
+            var cnt = 0;
+            var all_liked_posts = [];
+            var cb = function(liked_posts, old_offset) {
+                cnt++;
+                all_liked_posts[old_offset/step] = liked_posts;
+                progressbar.progress(cnt/loops);
+                if (old_offset === 0)
+                    socket.emit('set last', liked_posts[0].id);
 
-        var step = Math.min(num_likes, 20);
-        var loops = Math.ceil(num_likes/step);
-        var cnt = 0;
-        var all_liked_posts = [];
-        var cb = function(liked_posts, old_offset) {
-            cnt++;
-            all_liked_posts[old_offset/step] = liked_posts;
-            progressbar.progress(cnt/loops);
-            if (old_offset === 0)
-                socket.emit('set last', liked_posts[0].id);
-
-            if (cnt == loops) {
-                var stopped = false;
-                var all_urls = all_liked_posts.reduce(function(acc, posts) {
-                    var urls = [];
-                    posts.forEach(function(post) {
-                        if (post.id == last) {
-                            app.logger.log(
-                                "collecting urls stopped at %d for %d with %d",
-                                old_offset, post.id, last);
-                            stopped = true;
-                        }
-                        if (stopped)
-                            return;
-                        app.logger.log(util.inspect(post, false, null, true));
-                        if (post.type == 'video') {
-                            if (post.video_url)
-                                urls.push(post.video_url);
-                        } else if (post.type == 'photo' && post.photos) {
-                            post.photos.forEach(function(photo) {
-                                urls.push(photo.original_size.url);
-                            });
-                        }
-                    });
-                    return acc.concat(urls);
-                }, []);
-                app.logger.log("all urls: %s", util.inspect(all_urls));
-                getPhotos(all_urls, socket, progressbar);
+                if (cnt == loops) {
+                    var stopped = false;
+                    var all_urls = all_liked_posts.reduce(function(acc, posts) {
+                        var urls = [];
+                        posts.forEach(function(post) {
+                            if (post.id == last) {
+                                app.logger.log(
+                                    "collecting urls stopped at %d for %d with %d",
+                                    old_offset, post.id, last);
+                                stopped = true;
+                            }
+                            if (stopped)
+                                return;
+                            app.logger.log(util.inspect(post, false, null, true));
+                            if (post.type == 'video') {
+                                if (post.video_url)
+                                    urls.push(post.video_url);
+                            } else if (post.type == 'photo' && post.photos) {
+                                post.photos.forEach(function(photo) {
+                                    urls.push(photo.original_size.url);
+                                });
+                            }
+                        });
+                        return acc.concat(urls);
+                    }, []);
+                    app.logger.log("all urls: %s", util.inspect(all_urls));
+                    getPhotos(all_urls, socket, progressbar);
+                }
+            };
+            var offset = 0;
+            while (offset+step <= num_likes) {
+                getUserLikes(oAuthConfig, offset, step, cb);
+                offset += step;
             }
         };
-        var offset = 0;
-        while (offset+step <= num_likes) {
-            //getUserLikes(oAuthConfig, offset, step, cb);
-            offset += step;
-        }
-    });
-});
 
-function getUserFollowing(oAuthConfig, num_following) {
+        getUserFollowing(session, progressbar, getLikes);
+
+    }); // end socket.on
+}); // end sio.sockets.on
+
+function getUserFollowing(session, progressbar, then) {
     app.logger.log("getting %d followings", num_following);
+
+    progressbar.init().status('Retrieving followings ...');
+
+    var oAuthConfig = getOAuthConfig(session);
+
+    var num_following = session.auth.tumblr.user.following;
 
     var tumblr = new Tumblr(oAuthConfig);
 
@@ -227,18 +237,20 @@ function getUserFollowing(oAuthConfig, num_following) {
     var resultHandler = function(err, res) {
         num_responses++;
 
+        progressbar.progress(num_responses/num_requests);
+
         app.logger.log(util.inspect(res, false, null, true));
 
         if (!err)
             following = following.concat(res.blogs);
 
         if (num_responses == num_requests ) {
-            var filename = config.cache_dir+"test.json";
+            var filename = config.cache_dir+session.auth.tumblr.user.name+"_following.json";
             app.logger.log("got %d followings", following.length);
             var file = fs.createWriteStream(filename);
             file.write(JSON.stringify(following, null, 4));
             file.end();
-
+            then(filename);
         }
     };
 
