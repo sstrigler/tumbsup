@@ -216,26 +216,35 @@ function getUserFollowing(oAuthConfig, num_following) {
     app.logger.log("getting %d followings", num_following);
 
     var tumblr = new Tumblr(oAuthConfig);
-    var following = [];
+
     var offset = 0;
     var limit = 20;
 
-    var resultHandler = function(offset)  {
-        return function(err, res) {
-            app.logger.log(res);
-            app.logger.log(offset);
-            if (!err)
-                following = following.concat(res.blogs);
-            app.logger.log(following.length);
-            if (following.length == num_following ) {
-                app.logger.log("got %d followings", following.length);
-            }
-        };
+    var following = [];
+    var num_requests = Math.ceil(num_following/limit);
+    var num_responses = 0;
+
+    var resultHandler = function(err, res) {
+        num_responses++;
+
+        app.logger.log(util.inspect(res, false, null, true));
+
+        if (!err)
+            following = following.concat(res.blogs);
+
+        if (num_responses == num_requests ) {
+            var filename = config.cache_dir+"test.json";
+            app.logger.log("got %d followings", following.length);
+            var file = fs.createWriteStream(filename);
+            file.write(JSON.stringify(following, null, 4));
+            file.end();
+
+        }
     };
 
     while (offset < num_following) {
         tumblr.getUserFollowing({limit: limit, offset: offset},
-                                resultHandler(offset));
+                                resultHandler);
         offset += limit;
     }
 }
