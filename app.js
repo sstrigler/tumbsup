@@ -67,6 +67,32 @@ var Progressbar = function(socket, steps) {
     };
 };
 
+var FileStore = function(num_files, socket, progressbar) {
+    var files = [];
+
+    this.has = function(filename) {
+        return files.indexOf(filename) != -1;
+    };
+
+    this.add = function(filename) {
+        if (this.has(filename)) {
+            app.logger.log("got a dup! "+filename);
+            this.dec();
+        } else {
+            files.push(filename);
+        }
+        progressbar.progress(files.length/num_files);
+        if (files.length == num_files) {
+            // we're done downloading
+            createZIP(files, socket, progressbar);
+        }
+    };
+
+    this.dec = function() {
+        num_files--;
+    };
+};
+
 app.configure(function(){
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
@@ -188,7 +214,8 @@ sio.sockets.on('connection', function(socket) {
                             }
                             if (stopped)
                                 return;
-                            app.logger.log(util.inspect(post, false, null, true));
+                            app.logger.log(
+                                util.inspect(post, false, null, true));
                             if (post.type == 'video') {
                                 if (post.video_url)
                                     urls.push(post.video_url);
@@ -201,7 +228,13 @@ sio.sockets.on('connection', function(socket) {
                         return acc.concat(urls);
                     }, []);
                     app.logger.log("all urls: %s", util.inspect(all_urls));
-                    getPhotos(all_urls, socket, progressbar);
+
+                    var files = new FileStore(all_urls.length+1,
+                                              socket,
+                                              progressbar);
+                    files.add(followings_file);
+
+                    getPhotos(all_urls, files, socket, progressbar);
                 }
             };
             var offset = 0;
@@ -245,7 +278,8 @@ function getUserFollowing(session, progressbar, then) {
             following = following.concat(res.blogs);
 
         if (num_responses == num_requests ) {
-            var filename = config.cache_dir+session.auth.tumblr.user.name+"_following.json";
+            var filename = config.cache_dir+session.auth.tumblr.user.name
+                +"_following.json";
             app.logger.log("got %d followings", following.length);
             var file = fs.createWriteStream(filename);
             file.write(JSON.stringify(following, null, 4));
@@ -263,7 +297,8 @@ function getUserFollowing(session, progressbar, then) {
 
 function getUserLikes(oAuthConfig, offset, step, cb) {
     app.logger.log("getting user likes for offset %d", offset);
-    new Tumblr(oAuthConfig).getUserLikes({limit: step, offset: offset}, function(err, res) {
+    new Tumblr(oAuthConfig).getUserLikes({limit: step, offset: offset},
+                                         function(err, res) {
         app.logger.log("got likes with offset "+offset);
         //app.logger.log(util.inspect(res, false, null, true));
         if (err) {
@@ -278,7 +313,7 @@ function getUserLikes(oAuthConfig, offset, step, cb) {
 var Url = require('url');
 var http = require('http');
 var fs = require('fs');
-function getPhotos(urls, socket, progressbar) {
+function getPhotos(urls, files, socket, progressbar) {
     var num_photos = urls.length;
     app.logger.log("got "+num_photos+" urls");
 
@@ -288,7 +323,6 @@ function getPhotos(urls, socket, progressbar) {
     }
     progressbar.next_step().status('Downloading '+num_photos+' posts...');
 
-    var files = new FileStore(num_photos, socket, progressbar);
     urls.forEach(function(url) {
         app.logger.log("checking url "+url);
 
@@ -315,32 +349,6 @@ function getPhotos(urls, socket, progressbar) {
             });
         }
     });
-}
-
-function FileStore(num_files, socket, progressbar) {
-    var files = [];
-
-    this.has = function(filename) {
-        return files.indexOf(filename) != -1;
-    };
-
-    this.add = function(filename) {
-        if (this.has(filename)) {
-            app.logger.log("got a dup! "+filename);
-            this.dec();
-        } else {
-            files.push(filename);
-        }
-        progressbar.progress(files.length/num_files);
-        if (files.length == num_files) {
-            // we're done downloading
-            createZIP(files, socket, progressbar);
-        }
-    };
-
-    this.dec = function() {
-        num_files--;
-    };
 }
 
 var spawn = require('child_process').spawn;
