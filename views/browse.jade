@@ -23,7 +23,7 @@ if blog
         a(href=photo.original_size.url, title="click to enlarge")
           img(src=best_size.url)
       div!= post.caption
-      hr(noshade)
+      hr(noshade, size=1)
       a(href=post.post_url) Post
       if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
         |  | From:&nbsp;
