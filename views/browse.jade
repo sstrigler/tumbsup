@@ -11,30 +11,30 @@ script
 p
 if blog
   each post in blog.posts
-    each photo in post.photos
-      - var best_size;
-      - for (var p in photo.alt_sizes) {
-      -   if (photo.alt_sizes[p].width <= 400) {
-      -     best_size = photo.alt_sizes[p];
-      -     break;
-      -   }
-      - }
-      div#bubble
+    div#bubble
+      each photo in post.photos
+        - var best_size;
+        - for (var p in photo.alt_sizes) {
+        -   if (photo.alt_sizes[p].width <= 400) {
+        -     best_size = photo.alt_sizes[p];
+        -     break;
+        -   }
+        - }
         a(href=photo.original_size.url, title="click to enlarge")
           img(src=best_size.url)
-        div!= post.caption
-        hr(noshade)
-        a(href=post.post_url) Post
-        if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
-          |  | From:&nbsp;
-          a(href='/browse/'+post.reblogged_from_name)= post.reblogged_from_name
-        if post.reblogged_root_url
-          |  | Source:&nbsp;
-          a(href='/browse/'+post.reblogged_root_name)= post.reblogged_root_name
-        if post.link_url
-          | |&nbsp;
-          a(href=post.link_url) Link
-      p
+      div!= post.caption
+      hr(noshade)
+      a(href=post.post_url) Post
+      if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
+        |  | From:&nbsp;
+        a(href='/browse/'+post.reblogged_from_name)= post.reblogged_from_name
+      if post.reblogged_root_url
+        |  | Source:&nbsp;
+        a(href='/browse/'+post.reblogged_root_name)= post.reblogged_root_name
+      if post.link_url
+        | |&nbsp;
+        a(href=post.link_url) Link
+    p
   div#bubble
     - var capped_offset = Math.min(Math.max(offset, 0), blog.total_posts)
     - var prev = Math.max(capped_offset-20,0)
