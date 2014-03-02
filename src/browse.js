@@ -1,12 +1,13 @@
 var Tumblr = require("tumblr2"),
     util = require('util');
 
-function handleGetBlogPosts(app, config, blogId, res) {
+function handleGetBlogPosts(app, config, blogId, offset, res) {
     return function(err, blog) {
         app.logger.log(util.inspect(blog, false, null, true));
         res.render('browse', {title:'Browsing '+blogId,
                               host: config.host,
                               blogId: blogId,
+                              offset: offset,
                               blog: blog});
     }
 };
@@ -17,7 +18,8 @@ module.exports = function(app, config) {
 
     return {
         get: function(req, res) {
-            var blogId = req.params.blogId;
+            var blogId = req.params.blogId || req.query.blogId;
+            var offset = req.query.offset || 0;
             if (blogId) {
                 if (blogId.indexOf('.') == -1) // presumably a plain tumblr-id
                     blogId += ".tumblr.com";
@@ -28,8 +30,10 @@ module.exports = function(app, config) {
                 if (blogId.indexOf('/') != -1) // strip trailing slash
                     blogId = blogId.substring(0, blogId.indexOf('/'));
                 app.logger.log(blogId);
-                tumblr.getBlogPosts({blogId:blogId, type: ["photo"]},
-                                    handleGetBlogPosts(app, config, blogId, res));
+                tumblr.getBlogPosts({ blogId:blogId,
+                                      type: ["photo"],
+                                      offset: offset},
+                                    handleGetBlogPosts(app, config, blogId, offset, res));
             } else {
                 res.render('browse', {title:'Browse tumblelog',
                                       host: config.host,

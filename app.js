@@ -108,14 +108,6 @@ app.configure(function(){
     }));
     app.use(everyauth.middleware());
     app.use(express.methodOverride());
-    app.use(function(req, res, next) {
-        var blogId;
-        if (blogId = req.url.match(/\/browse\/\?blogId=(.+)$/)) {
-            console.log("blog: "+blogId[1]);
-            req.url = /browse/+blogId[1];
-        }
-        next();
-    });
     app.use(app.router);
     app.use(express.static(__dirname + '/public'));
 });

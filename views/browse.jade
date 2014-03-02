@@ -6,7 +6,7 @@ div#bubble
 script
   $('#browseForm').submit(function() {
     document.location.href = '/browse/' + encodeURIComponent($('#browseForm input[name=blogId]').val());
-    return false; 
+    return false;
   });
 p
 if blog
@@ -17,3 +17,14 @@ if blog
           div#bubble
             img(src=alt_size.url)
           p
+  div#bubble
+    - var capped_offset = Math.min(Math.max(offset, 0), blog.total_posts)
+    - var prev = Math.max(capped_offset-20,0)
+    if offset > 0
+      a(href='/browse/'+blogId+'?offset='+prev)
+        | &lt;&lt; previous
+    - var next = capped_offset+20
+      if (next < blog.total_posts)
+        if offset > 0
+          |  |
+        a(href='/browse/'+blogId+'?offset='+next) next >>
