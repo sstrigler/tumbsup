@@ -33,7 +33,7 @@ module.exports = function(app, config) {
             } else {
                 res.render('browse', {title:'Browse tumblelog',
                                       host: config.host,
-                                      blogId: blogId,
+                                      blogId: '',
                                       blog:false});
             }
         }
