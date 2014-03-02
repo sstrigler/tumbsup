@@ -108,6 +108,14 @@ app.configure(function(){
     }));
     app.use(everyauth.middleware());
     app.use(express.methodOverride());
+    app.use(function(req, res, next) {
+        var blogId;
+        if (blogId = req.url.match(/\/browse\/\?blogId=(.+)$/)) {
+            console.log("blog: "+blogId[1]);
+            req.url = /browse/+blogId[1];
+        }
+        next();
+    });
     app.use(app.router);
     app.use(express.static(__dirname + '/public'));
 });
@@ -125,7 +133,6 @@ app.configure('production', function(){
 everyauth.helpExpress(app);
 
 // Routes
-
 app.get('/', function(req, res){
     if (req.session && req.session.auth && req.session.auth.loggedIn) {
         app.logger.log("got auth:" + util.inspect(req.session.auth));
@@ -138,6 +145,9 @@ app.get('/', function(req, res){
         res.render('login', { title: 'Tumbsup', host: config.host });
     }
 });
+// browse blogs
+var browse = require('./src/browse.js')(app, config);
+app.get('/browse/:blogId?', browse.get);
 
 app.listen(config.port, function(){
     app.logger.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

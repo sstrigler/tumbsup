@@ -1,0 +1,19 @@
+div#bubble
+  form(id='browseForm', method='GET', action='/browse/')
+    | Browse
+    input(name='blogId', type='text', size=40, value=blogId)
+    input(type='submit')
+script
+  $('#browseForm').submit(function() {
+    document.location.href = '/browse/' + $('#browseForm input[name=blogId]').val();
+    return false; 
+  });
+p
+if blog
+  each post in blog.posts
+    each photo in post.photos
+      each alt_size in photo.alt_sizes
+        if alt_size.width == 400
+          div#bubble
+            img(src=alt_size.url)
+          p
