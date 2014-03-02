@@ -1,7 +1,7 @@
 div#bubble
   form(id='browseForm', method='GET', action='/browse/')
-    | Browse
-    input(name='blogId', type='text', size=40, value=blogId)
+    | Browse 
+    input(name='blogId', type='text', size=50, value=blogId)
     input(type='submit')
 script
   $('#browseForm').submit(function() {
@@ -15,7 +15,7 @@ if blog
       each photo in post.photos
         - var best_size;
         - for (var p in photo.alt_sizes) {
-        -   if (photo.alt_sizes[p].width <= 400) {
+        -   if (photo.alt_sizes[p].width <= 500) {
         -     best_size = photo.alt_sizes[p];
         -     break;
         -   }
@@ -26,10 +26,10 @@ if blog
       hr(noshade, size=1)
       a(href=post.post_url) Post
       if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
-        |  | From:&nbsp;
+        |  | From: 
         a(href='/browse/'+post.reblogged_from_name)= post.reblogged_from_name
       if post.reblogged_root_url
-        |  | Source:&nbsp;
+        |  | Source: 
         a(href='/browse/'+post.reblogged_root_name)= post.reblogged_root_name
       if post.link_url
         | |&nbsp;

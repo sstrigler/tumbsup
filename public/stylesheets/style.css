@@ -27,6 +27,10 @@ strong, .strong {
     color:#bf2f2f !important;
 }
 
+#container {
+  width: 570px !important;
+}
+
 #menu {
     float:right;
     list-style-type: none;
