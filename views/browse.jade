@@ -5,7 +5,7 @@ div#bubble
     input(type='submit')
 script
   $('#browseForm').submit(function() {
-    document.location.href = '/browse/' + $('#browseForm input[name=blogId]').val();
+    document.location.href = '/browse/' + encodeURIComponent($('#browseForm input[name=blogId]').val());
     return false; 
   });
 p
