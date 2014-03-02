@@ -21,14 +21,14 @@ if blog
             else
               img(src=alt_size.url)
             div!= post.caption
-            hr
-            a(href=post.post_url, target="_blank") Post
+            hr(noshade)
+            a(href=post.post_url) Post
             if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
               |  | From:&nbsp;
-              a(href='/browse/'+post.reblogged_from_name, target="_blank")= post.reblogged_from_name
+              a(href='/browse/'+post.reblogged_from_name)= post.reblogged_from_name
             if post.reblogged_root_url
               |  | Source:&nbsp;
-              a(href='/browse/'+post.reblogged_root_name, target="_blank")= post.reblogged_root_name
+              a(href='/browse/'+post.reblogged_root_name)= post.reblogged_root_name
           p
   div#bubble
     - var capped_offset = Math.min(Math.max(offset, 0), blog.total_posts)
