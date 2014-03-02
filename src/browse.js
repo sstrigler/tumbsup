@@ -3,12 +3,21 @@ var Tumblr = require("tumblr2"),
 
 function handleGetBlogPosts(app, config, blogId, offset, res) {
     return function(err, blog) {
+        app.logger.log(util.inspect(err, false, null, true));
         app.logger.log(util.inspect(blog, false, null, true));
-        res.render('browse', {title:'Browsing '+blogId,
-                              host: config.host,
-                              blogId: blogId,
-                              offset: offset,
-                              blog: blog});
+        if (err) {
+            var error = (err.statusCode==404)?'Error: Blog not found':'Unkown Error';
+            res.render('browse', { title: error,
+                                   host: config.host,
+                                   blogId: blogId,
+                                   blog: false});
+        } else {
+            res.render('browse', {title:'Browsing '+blogId,
+                                  host: config.host,
+                                  blogId: blogId,
+                                  offset: offset,
+                                  blog: blog});
+        }
     }
 };
 
