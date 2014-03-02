@@ -32,7 +32,9 @@ module.exports = function(app, config) {
                 app.logger.log(blogId);
                 tumblr.getBlogPosts({ blogId:blogId,
                                       type: ["photo"],
-                                      offset: offset},
+                                      offset: offset,
+                                      reblog_info: true
+                                    },
                                     handleGetBlogPosts(app, config, blogId, offset, res));
             } else {
                 res.render('browse', {title:'Browse tumblelog',

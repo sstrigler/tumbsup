@@ -15,7 +15,20 @@ if blog
       each alt_size in photo.alt_sizes
         if alt_size.width == 400
           div#bubble
-            img(src=alt_size.url)
+            if post.link_url
+              a(href=post.link_url, target="_blank")
+                img(src=alt_size.url)
+            else
+              img(src=alt_size.url)
+            div!= post.caption
+            hr
+            a(href=post.post_url, target="_blank") Post
+            if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
+              |  | From:&nbsp;
+              a(href='/browse/'+post.reblogged_from_name, target="_blank")= post.reblogged_from_name
+            if post.reblogged_root_url
+              |  | Source:&nbsp;
+              a(href='/browse/'+post.reblogged_root_name, target="_blank")= post.reblogged_root_name
           p
   div#bubble
     - var capped_offset = Math.min(Math.max(offset, 0), blog.total_posts)
@@ -26,5 +39,5 @@ if blog
     - var next = capped_offset+20
       if (next < blog.total_posts)
         if offset > 0
-          |  |
+          | &nbsp;|&nbsp;
         a(href='/browse/'+blogId+'?offset='+next) next >>
