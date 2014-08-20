@@ -31,8 +31,6 @@ everyauth.tumblr
     .redirectPath('/');
 
 var app = module.exports = express.createServer();
-// Configuration
-
 var Logger = function(active) {
     this.log = function() {
         if (active) {
@@ -94,6 +92,7 @@ var FileStore = function(num_files, socket, progressbar) {
     };
 };
 
+// Configuration
 app.configure(function(){
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
