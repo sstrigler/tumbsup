@@ -5,7 +5,7 @@
 var express = require('express'),
 config = require('./config'),
 everyauth = require('everyauth'),
-Logger = require('./src/logger');
+Logger = require('./lib/logger');
 
 // Session store
 var RedisStore = require('connect-redis')(express);
@@ -64,11 +64,11 @@ everyauth.helpExpress(app);
 // Routes
 
 // backup blog
-var backup = require('./src/backup')(app, config);
+var backup = require('./lib/backup')(app, config);
 app.get('/backup', backup.get);
 
 // browse blogs
-var browse = require('./src/browse')(app, config);
+var browse = require('./lib/browse')(app, config);
 app.get('/browse/:blogId?', browse.get);
 
 app.listen(config.port, function(){
