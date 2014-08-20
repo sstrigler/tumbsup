@@ -8,7 +8,8 @@ util = require('util'),
 everyauth = require('everyauth'),
 io = require('socket.io'),
 Tumblr = require('tumblr2'),
-parseCookie = require('./node_modules/express/node_modules/connect/lib/utils').parseCookie;
+parseCookie = require('./node_modules/express/node_modules/connect/lib/utils').parseCookie,
+Logger = require('src/logger.js');
 
 // Session store
 var RedisStore = require('connect-redis')(express);
@@ -31,13 +32,6 @@ everyauth.tumblr
     .redirectPath('/');
 
 var app = module.exports = express.createServer();
-var Logger = function(active) {
-    this.log = function() {
-        if (active) {
-            console.log.apply(this, arguments);
-        }
-    };
-};
 
 // Configuration
 app.configure(function(){
@@ -124,7 +118,6 @@ sio.sockets.on('connection', function(socket) {
     // * determining photos to download
     // * download photos
     // * create zip file
-
 
     // sets remote progress via socket
     var progressbar = new Progressbar(socket, 4);
