@@ -39,35 +39,6 @@ var Logger = function(active) {
     };
 };
 
-// sets remote progress via socket
-var Progressbar = require('./src/progressbar.js');
-
-var FileStore = function(num_files, socket, progressbar) {
-    var files = [];
-
-    this.has = function(filename) {
-        return files.indexOf(filename) != -1;
-    };
-
-    this.add = function(filename) {
-        if (this.has(filename)) {
-            app.logger.log("got a dup! "+filename);
-            this.dec();
-        } else {
-            files.push(filename);
-        }
-        progressbar.progress(files.length/num_files);
-        if (files.length == num_files) {
-            // we're done downloading
-            createZIP(files, socket, progressbar);
-        }
-    };
-
-    this.dec = function() {
-        num_files--;
-    };
-};
-
 // Configuration
 app.configure(function(){
     app.set('views', __dirname + '/views');
@@ -143,6 +114,8 @@ sio.set('authorization', function(data, accept) {
 });
 
 sio.sockets.on('connection', function(socket) {
+    var Progressbar = require('./src/progressbar.js');
+    var FileStore = require('./src/filestore.js');
     var session = socket.handshake.session;
     app.logger.log('got handshake:\n'+util.inspect(session, false, null, true));
 
@@ -151,6 +124,9 @@ sio.sockets.on('connection', function(socket) {
     // * determining photos to download
     // * download photos
     // * create zip file
+
+
+    // sets remote progress via socket
     var progressbar = new Progressbar(socket, 4);
 
     socket.on('tumbsup', function(last) {
