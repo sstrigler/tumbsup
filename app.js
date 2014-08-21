@@ -63,9 +63,9 @@ everyauth.helpExpress(app);
 
 // Routes
 
-// backup blog
+// root - backup blog
 var backup = require('./lib/backup')(app, config);
-app.get('/backup', backup.get);
+app.get('/', backup.get);
 
 // browse blogs
 var browse = require('./lib/browse')(app, config);
