@@ -1,3 +1,18 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  padding-top: 50px;
+  margin-bottom: 60px;
+}
+
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+
 h1, h1 a {
     color:#676e74;
 }
@@ -27,26 +42,6 @@ strong, .strong {
     color:#bf2f2f !important;
 }
 
-#container {
-  width: 548px !important;
-}
-
-#menu {
-    float:right;
-    list-style-type: none;
-    -webkit-margin-before: 0px;
-    -webkit-margin-after: 0px;
-    -webkit-padding-start: 0;
-}
-
-#menu a {
-    color: #36506a;
-}
-
-#menu a:hover {
-    color: #676e74;
-}
-
 #progressbar {
     margin-bottom: 20px; 
 }
@@ -61,3 +56,18 @@ ol#instructions li {
     padding: 0 4px;
 }
 ol#instructions li + li:before { content: '»'; position: relative; left: -4px; }  
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+}
+
+.footer > .container {
+  margin-top: 20px;
+  padding-right: 15px;
+  padding-left: 15px;
+}

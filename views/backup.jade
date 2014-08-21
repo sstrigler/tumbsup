@@ -1,3 +1,4 @@
+link(rel='stylesheet', href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css')
 script(src='/javascripts/jquery.cookie.js')
 script(src='/socket.io/socket.io.js')
 script
@@ -53,9 +54,6 @@ div#user
   a#user_url(href="#{blog.url}", target="_blank")= blog.url
 div#bubble
   div#nipple
-  ul#menu
-    li
-     a(href='http://baemagain.tumblr.com/ask', title='Help/Questions', target='_blank') ?
   div#info.text
     | You've got <strong>#{everyauth.tumblr.user.likes}</strong> likes.
     if everyauth.tumblr.user.likes > limit

@@ -1,40 +1,33 @@
-div#bubble
-  form(id='browseForm', method='GET', action='/browse/')
-    | Browse 
-    input(name='blogId', type='text', size=50, value=blogId)
-    input(type='submit')
-script
-  $('#browseForm').submit(function() {
-    document.location.href = '/browse/' + encodeURIComponent($('#browseForm input[name=blogId]').val());
-    return false;
-  });
-p
 if blog
+  h2= blog.blog.title
   each post in blog.posts
-    div#bubble
-      each photo in post.photos
-        - var best_size;
-        - for (var p in photo.alt_sizes) {
-        -   if (photo.alt_sizes[p].width <= 500) {
-        -     best_size = photo.alt_sizes[p];
-        -     break;
-        -   }
-        - }
-        a(href=photo.original_size.url, title="click to enlarge")
-          img(src=best_size.url)
-      div!= post.caption
-      hr(noshade, size=1)
-      a(href=post.post_url) Post
-      if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
-        |  | From: 
-        a(href='/browse/'+post.reblogged_from_name)= post.reblogged_from_name
-      if post.reblogged_root_url
-        |  | Source: 
-        a(href='/browse/'+post.reblogged_root_name)= post.reblogged_root_name
-      if post.link_url
-        |  | 
-        a(href=post.link_url) Link
-    p
+    .panel.panel-default
+      if typeof post.caption != 'undefined' && post.caption != ''
+        .panel-heading
+          .panel-title!= post.caption
+      .panel-body
+        each photo in post.photos
+          - var best_size;
+          - for (var p in photo.alt_sizes) {
+          -   if (photo.alt_sizes[p].width <= 500) {
+          -     best_size = photo.alt_sizes[p];
+          -     break;
+          -   }
+          - }
+          a(href=photo.original_size.url, title="click to enlarge")
+            img(src=best_size.url)
+      .panel-footer
+        a(href=post.post_url) Post
+        if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
+          |  | From: 
+          a(href='/browse/'+post.reblogged_from_name)= post.reblogged_from_name
+        if post.reblogged_root_url
+          |  | Source: 
+          a(href='/browse/'+post.reblogged_root_name)= post.reblogged_root_name
+        if post.link_url
+          |  | 
+          a(href=post.link_url) Link
+    
   div#bubble
     - var capped_offset = Math.min(Math.max(offset, 0), blog.total_posts)
     - var prev = Math.max(capped_offset-20,0)

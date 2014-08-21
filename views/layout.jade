@@ -1,14 +1,16 @@
 !!!
-html
+html(lang='en')
   head
     title= title
-    link(rel='stylesheet', href='http://assets.tumblr.com/stylesheets/compressed/auth.css?947')
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css')
-    script(src='http://static.ak.fbcdn.net/connect/en_US/core.js')
+
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js')
     script(src='http://platform.tumblr.com/v1/share.js')
-    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
-    script(src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js')
+
     script
       (function() {
         var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
@@ -17,21 +19,51 @@ html
         s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
         t.parentNode.insertBefore(s, t);
       })();
-  body
-    div#container!= body
-      hr(noshade, size=1)
-      div(style='float:right;')
-        span#tumblr_button_abc123
-      | <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://tumbsup.de"></a>
 
-script
-  var tumblr_link_url = "#{host}";
-  var tumblr_link_name = "Tumbsup";
-  var tumblr_link_description = "Backup all your beloved Tumblr stuff";
-script
-  var tumblr_button = document.createElement("a");
-  tumblr_button.setAttribute("href", "http://www.tumblr.com/share/link?url=" + encodeURIComponent(tumblr_link_url) + "&name=" + encodeURIComponent(tumblr_link_name) + "&description=" + encodeURIComponent(tumblr_link_description));
-  tumblr_button.setAttribute("title", "Share on Tumblr");
-  tumblr_button.setAttribute("style", "display:inline-block; text-indent:-9999px; overflow:hidden; width:129px; height:20px; background-color:red; background:url('http://platform.tumblr.com/v1/share_3.png') top left no-repeat transparent;");
-  tumblr_button.innerHTML = "Share on Tumblr";
-  document.getElementById("tumblr_button_abc123").appendChild(tumblr_button);
+  body
+    .navbar.navbar-inverse.navbar-fixed-top(role='navigation')
+      .container
+        .navbar-header
+          a.navbar-brand(href='/') Tumbsup
+        form.navbar-form.navbar-left(id='browseForm', role='browse')
+          .form-group
+            label(for='blogId').sr-only Blog Name
+            if typeof blogId != 'undefined'
+              input.form-control(name='blogId', type='text', value=blogId)
+            else
+              input.form-control(name='blogId', type='text', placeholder='Browse a blog')
+          | &nbsp;
+          button.btn.btn-default(type='submit') Go!
+        ul.nav.navbar-nav.navbar-right
+          li
+            a(href='http://baemagain.tumblr.com/ask', title='Help/Questions', target='_blank') ?
+
+    script
+      $('#browseForm').submit(function() {
+        document.location.href = '/browse/' + encodeURIComponent($('#browseForm input[name=blogId]').val());
+        return false;
+      });
+
+    if typeof error != 'undefined'
+      .container
+        .error= error
+
+    .container!= body
+
+    .footer
+      .container
+        div(style='float:right;')
+          span#tumblr_button_abc123
+        | <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://tumbsup.de"></a>
+        script
+          var tumblr_link_url = "#{host}";
+          var tumblr_link_name = "Tumbsup";
+          var tumblr_link_description = "Backup all your beloved Tumblr stuff";
+          var tumblr_button = document.createElement("a");
+          tumblr_button.setAttribute("href", "http://www.tumblr.com/share/link?url=" + encodeURIComponent(tumblr_link_url) + "&name=" + encodeURIComponent(tumblr_link_name) + "&description=" + encodeURIComponent(tumblr_link_description));
+          tumblr_button.setAttribute("title", "Share on Tumblr");
+          tumblr_button.setAttribute("style", "display:inline-block; text-indent:-9999px; overflow:hidden; width:129px; height:20px; background-color:red; background:url('http://platform.tumblr.com/v1/share_3.png') top left no-repeat transparent;");
+          tumblr_button.innerHTML = "Share on Tumblr";
+          document.getElementById("tumblr_button_abc123").appendChild(tumblr_button);
+
+    script(src='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js')
