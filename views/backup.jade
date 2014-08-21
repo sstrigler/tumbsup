@@ -1,44 +1,38 @@
-link(rel='stylesheet', href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css')
 script(src='/javascripts/jquery.cookie.js')
 script(src='/socket.io/socket.io.js')
 script
-  (function() {
-      var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
-      s.type = 'text/javascript';
-      s.async = true;
-      s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
-      t.parentNode.insertBefore(s, t);
-  })();
-script
   var socket = io.connect('#{host}');
   $(document).ready(function() {
-      $('#progressbar').progressbar({value: 0});
-      $('#progressbar').hide();
-      $('button#download').hide();
+      $('#two').hide();
+      $('#three').hide();
       if (!$.cookie('last'))
         $('#newonly_wrap').hide();
   });
   function tumbsUp(button) {
-    $(button).hide();
-    $('#progressbar').show();
-    $('#newonly_wrap').hide();
+
+    $('#one').hide();
+    $('#two').show();
+
     var last = $('#newonly').is(':checked')?$.cookie('last'):null;
     var num_photos = photos_received = 0;
-    $('#progressbar').progressbar("option", "value", 0);
     socket.emit('tumbsup', last);
     socket.on('progress', function(progress) {
-      $('#progressbar').progressbar("option", "value", progress);
+      $('#progress_bar').css("width", progress+'%').attr("aria-valuenow", progress);
     });
     socket.on('status', function(status) {
-      $('#progressbar').attr('title', status);
+      $('#progress').attr('title', status);
     });
     socket.on('set last', function(last) {
       $.cookie('last', last, {expires:365});
     });
     socket.on('download', function(download) {
-      $('button#download').click(function() {
+
+      $('#download-btn').click(function() {
         document.location.href = download;
-      }).show();
+      });
+
+      $('#two').hide();
+      $('#three').show();
     });
     socket.on('done', function() {
       socket.removeAllListeners('progress');
@@ -46,31 +40,36 @@ script
     });
     return false;
   }
-div#user
-  a#user_avatar(href="#{blog.url}",
-    target="_blank",
-    style="background-image:url('http://api.tumblr.com/v2/blog/#{blog.name}.tumblr.com/avatar')") 
-  a#user_name(href="#{blog.url}", target="_blank")= blog.title
-  a#user_url(href="#{blog.url}", target="_blank")= blog.url
-div#bubble
-  div#nipple
-  div#info.text
-    | You've got <strong>#{everyauth.tumblr.user.likes}</strong> likes.
-    if everyauth.tumblr.user.likes > limit
-      p
-        | <strong>There's a limit of #{limit} likes, so you won't be able to download them all. We're sorry!</strong>
-  div#progressbar
-  div#newonly_wrap.note
-    input#newonly(type='checkbox')
-    label(for='newonly', title='Download posts only that are new since you last downloaded')  Download new posts only
-  div#buttons(style='text-align:center')
-    button#download.chrome.green
-      div.chrome_button
-        div.chrome_button_left
-        | Download ZIP file
-        div.chrome_button_right
-    button.chrome.green(onclick='return tumbsUp(this)')
-      div.chrome_button
-        div.chrome_button_left
-        | Get'em all!
-        div.chrome_button_right
+
+.starter-template
+  .jumbotron
+
+    h2
+      img(src='http://api.tumblr.com/v2/blog/#{blog.name}.tumblr.com/avatar', height=32)
+      |  #{blog.title}
+
+    #one
+      p Backup your blog!   
+      | You've got <strong>#{everyauth.tumblr.user.likes}</strong> likes.
+      if everyauth.tumblr.user.likes > limit
+        p.error
+          | <strong>There's a limit of #{limit} likes, so you won't be able to download all your favorited posts. We're sorry!</strong>
+      #newonly_wrap.note
+        input#newonly(type='checkbox') 
+        label(for='newonly', title='Download posts only that are new since you last downloaded') Download new posts only
+      button.btn.btn-primary(onclick='return tumbsUp(this)') Backup!
+
+    #two
+      p Creating backup ...
+      #progress.progress
+        #progress_bar.progress-bar(role='progressbar',
+                                   aria-valuenow="0",
+                                   aria-valuemin="0",
+                                   aria-valuemax="100",
+                                   style="width: 0%;")
+          span.sr-only 0% Complete
+
+    #three
+      p Backup finished!
+      button.btn.btn-success#download-btn Download ZIP file
+  
