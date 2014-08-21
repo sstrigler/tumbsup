@@ -57,6 +57,8 @@ ol#instructions li {
 }
 ol#instructions li + li:before { content: '»'; position: relative; left: -4px; }  
 
+.panel { width: 532px; }
+
 .footer {
   position: absolute;
   bottom: 0;
@@ -70,4 +72,8 @@ ol#instructions li + li:before { content: '»'; position: relative; left: -4px; 
   margin-top: 20px;
   padding-right: 15px;
   padding-left: 15px;
+}
+
+a#user_avatar {
+  padding: 24px 32px;
 }
