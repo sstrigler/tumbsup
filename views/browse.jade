@@ -2,9 +2,6 @@ if blog
   h2= blog.blog.title
   each post in blog.posts
     .panel.panel-default
-      if typeof post.caption != 'undefined' && post.caption != ''
-        .panel-heading
-          .panel-title!= post.caption
       .panel-body
         each photo in post.photos
           - var best_size;
@@ -16,6 +13,9 @@ if blog
           - }
           a(href=photo.original_size.url, title="click to enlarge")
             img(src=best_size.url)
+      if typeof post.caption != 'undefined' && post.caption != ''
+        .panel-body
+          .panel-title!= post.caption
       .panel-footer
         a(href=post.post_url) Post
         if post.reblogged_from_id && post.reblogged_from_name != post.reblogged_root_name
@@ -28,14 +28,13 @@ if blog
           |  | 
           a(href=post.link_url) Link
     
-  div#bubble
+  ul.pagination
     - var capped_offset = Math.min(Math.max(offset, 0), blog.total_posts)
     - var prev = Math.max(capped_offset-20,0)
-    if offset > 0
-      a(href='/browse/'+blogId+'?offset='+prev)
-        | &lt;&lt; previous
     - var next = capped_offset+20
-      if (next < blog.total_posts)
-        if offset > 0
-          | &nbsp;|&nbsp;
-        a(href='/browse/'+blogId+'?offset='+next) next >>
+    if offset > 0
+      li 
+        a(href='/browse/'+blogId+'?offset='+prev) &laquo;
+    if (next < blog.total_posts)
+      li 
+        a(href='/browse/'+blogId+'?offset='+next) &raquo;

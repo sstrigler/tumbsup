@@ -31,7 +31,7 @@ html(lang='en')
             span.icon-bar
           a.navbar-brand(href='/') Tumbsup
         #navbar-collapse.collapse.navbar-collapse
-          form.navbar-form.navbar-left(id='browseForm', role='search')
+          form.navbar-form.navbar-left(role='search', action='/browse/')
             .form-group
               label(for='blogId').sr-only Blog Name
               if typeof blogId != 'undefined'
@@ -43,12 +43,6 @@ html(lang='en')
           ul.nav.navbar-nav.navbar-right
             li
               a(href='http://baemagain.tumblr.com/ask', title='Help/Questions', target='_blank') ?
-
-    script
-      $('#browseForm').submit(function() {
-        document.location.href = '/browse/' + encodeURIComponent($('#browseForm input[name=blogId]').val());
-        return false;
-      });
 
     if typeof error != 'undefined'
       .container
