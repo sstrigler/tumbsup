@@ -1,10 +1,11 @@
 .starter-template
-  h2 Get your <em>backup</em> in 3 simple steps:
+  .jumbotron
+    h2 Get your <em>backup</em> in 3 simple steps:
 
-  ol#instructions.note
-    li <strong>Authorize</strong> us
-    li <strong>Start</strong> process
-    li <strong>Download</strong> your archive!
+    ol#instructions.note
+      li <strong>Authorize</strong> us
+      li <strong>Start</strong> process
+      li <strong>Download</strong> your archive!
 
-  form.form-inline(role='form', action='/auth/tumblr')
-    button.btn.btn-default(type='submit') Get started
+    form.form-inline(role='form', action='/auth/tumblr')
+      button.btn.btn-primary(type='submit') Get started
