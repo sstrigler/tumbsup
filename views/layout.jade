@@ -24,19 +24,25 @@ html(lang='en')
     .navbar.navbar-inverse.navbar-fixed-top(role='navigation')
       .container
         .navbar-header
+          button.navbar-toggle(type='button', data-toggle='collapse', data-target='#navbar-collapse')
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
           a.navbar-brand(href='/') Tumbsup
-        form.navbar-form.navbar-left(id='browseForm', role='browse')
-          .form-group
-            label(for='blogId').sr-only Blog Name
-            if typeof blogId != 'undefined'
-              input.form-control(name='blogId', type='text', value=blogId)
-            else
-              input.form-control(name='blogId', type='text', placeholder='Browse a blog')
-          | &nbsp;
-          button.btn.btn-default(type='submit') Go!
-        ul.nav.navbar-nav.navbar-right
-          li
-            a(href='http://baemagain.tumblr.com/ask', title='Help/Questions', target='_blank') ?
+        #navbar-collapse.collapse.navbar-collapse
+          form.navbar-form.navbar-left(id='browseForm', role='search')
+            .form-group
+              label(for='blogId').sr-only Blog Name
+              if typeof blogId != 'undefined'
+                input.form-control(name='blogId', type='text', value=blogId)
+              else
+                input.form-control(name='blogId', type='text', placeholder='Browse a blog')
+            | 
+            button.btn.btn-default(type='submit') Go!
+          ul.nav.navbar-nav.navbar-right
+            li
+              a(href='http://baemagain.tumblr.com/ask', title='Help/Questions', target='_blank') ?
 
     script
       $('#browseForm').submit(function() {
