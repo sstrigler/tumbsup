@@ -8,7 +8,7 @@ script
       if (!$.cookie('last'))
         $('#newonly_wrap').hide();
   });
-  function tumbsUp(button) {
+  function tumbsUp() {
 
     $('#one').hide();
     $('#two').show();
@@ -57,7 +57,7 @@ script
       #newonly_wrap.note
         input#newonly(type='checkbox') 
         label(for='newonly', title='Download posts only that are new since you last downloaded') Download new posts only
-      button.btn.btn-primary(onclick='return tumbsUp(this)') Backup!
+      button.btn.btn-primary(onclick='return tumbsUp();') Backup now!
 
     #two
       p Creating backup ...
