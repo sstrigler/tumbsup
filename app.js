@@ -62,12 +62,8 @@ app.configure('production', function(){
 everyauth.helpExpress(app);
 
 // Routes
-
-// root - backup blog
 var backup = require('./lib/backup')(app, config);
 app.get('/', backup.get);
-
-// browse blogs
 var browse = require('./lib/browse')(app, config);
 app.get('/browse/:blogId?', browse.get);
 
