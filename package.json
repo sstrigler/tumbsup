@@ -1,18 +1,31 @@
 {
     "name": "tumbsup",
     "description": "let's you backup your stuff at tumblr",
-    "author": { "name": "Stefan Strigler",
-                "email": "stefan@strigler.de"
-              },
-    "version": "1.0.0",
-    "keywords": ["tumblr", "backup", "download", "export", "import"],
-    "repository" : { "type":"git", "url":"https://github.com/sstrigler/tumbsup.git" },
-    "dependencies": {
-        "express": "2.5.8",
-        "jade": ">= 0.0.1",
-        "tumblr2": ">=0.1.6",
-        "connect-redis" : ">=1.0.7",
-        "socket.io" : ">=0.7.8"
+    "author": {
+        "name": "Stefan Strigler",
+        "email": "stefan@strigler.de"
     },
-    "main": "app.js"
+    "version": "1.0.0",
+    "keywords": [
+        "tumblr",
+        "backup",
+        "download",
+        "export",
+        "import"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/sstrigler/tumbsup.git"
+    },
+    "scripts": {
+        "start": "node ./bin/www"
+    },
+    "dependencies": {
+        "cookie-parser": "~1.4.3",
+        "debug": "~2.6.9",
+        "express": "~4.16.0",
+        "http-errors": "~1.6.2",
+        "morgan": "~1.9.0",
+        "pug": "2.0.0-beta11"
+    }
 }
