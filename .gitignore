@@ -10,3 +10,4 @@ config.js
 *.log
 *flymake.js
 dump.rdb
+/node_modules/
